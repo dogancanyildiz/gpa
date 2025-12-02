@@ -7,6 +7,7 @@ neuGPA projesine katkıda bulunmak istediğiniz için teşekkürler! Bu rehber, 
 - [Commit Kuralları](#commit-kuralları)
 - [Branch Stratejisi](#branch-stratejisi)
 - [Kod Standartları](#kod-standartları)
+- [CI/CD Süreci](#cicd-süreci)
 - [Pull Request Süreci](#pull-request-süreci)
 
 ## 🔄 Commit Kuralları
@@ -170,6 +171,104 @@ import { Button } from '@/components/ui/button'
 import type { User } from '@/types'
 ```
 
+## 🔄 CI/CD Süreci
+
+Proje GitHub Actions ile otomatik CI/CD pipeline'ı kullanır. Her push ve pull request'te otomatik olarak çalışır.
+
+### CI Pipeline Kontrolleri
+
+CI pipeline şu kontrolleri yapar:
+
+1. **Lint & Type Check**
+   - ESLint ile kod kalitesi kontrolü
+   - TypeScript type checking
+   - Kod standartlarına uyum kontrolü
+
+2. **Build Test**
+   - Production build testi
+   - Prisma Client generate kontrolü
+   - Build hatalarının tespiti
+
+3. **Database Migration Check**
+   - Prisma schema validation
+   - Migration status kontrolü
+   - Veritabanı yapısı doğrulama
+
+### CI Çalıştığı Branch'ler
+
+CI pipeline şu branch'lerde otomatik çalışır:
+
+**Push için:**
+- `main`
+- `develop`
+- `feat/**` (tüm feature branch'leri)
+- `release/**` (tüm release branch'leri)
+- `hotfix/**` (tüm hotfix branch'leri)
+- `t&q` (test & QA branch'i)
+
+**Pull Request için:**
+- `main`
+- `develop`
+- `release/**`
+- `t&q`
+
+### CI Başarısız Olursa
+
+Eğer CI pipeline başarısız olursa:
+
+1. **GitHub Actions sekmesine gidin**
+   - Repository'de "Actions" sekmesine tıklayın
+   - Başarısız workflow'u bulun
+
+2. **Hata detaylarını inceleyin**
+   - Hangi job başarısız oldu?
+   - Hangi adımda hata oluştu?
+   - Hata mesajı ne diyor?
+
+3. **Yerel olarak düzeltin**
+   ```bash
+   # Lint hatalarını kontrol et
+   pnpm lint
+   
+   # TypeScript hatalarını kontrol et
+   pnpm exec tsc --noEmit
+   
+   # Build testi yap
+   pnpm build
+   ```
+
+4. **Düzeltmeleri commit edin ve push edin**
+   ```bash
+   git add .
+   git commit -m "fix(ci): resolve linting errors"
+   git push
+   ```
+
+### CI'ı Yerel Olarak Test Etme
+
+CI'ı GitHub'a push etmeden önce yerel olarak test edebilirsiniz:
+
+```bash
+# Lint kontrolü
+pnpm lint
+
+# TypeScript type check
+pnpm exec tsc --noEmit
+
+# Build testi
+pnpm build
+
+# Prisma schema validation
+pnpm prisma validate
+```
+
+### CodeQL Security Analysis
+
+Proje ayrıca CodeQL ile otomatik güvenlik analizi yapar:
+- JavaScript/TypeScript kod analizi
+- Güvenlik açıklarının tespiti
+- Haftalık otomatik tarama
+
 ## 🔍 Pull Request Süreci
 
 1. **Branch oluştur:**
@@ -193,8 +292,14 @@ import type { User } from '@/types'
    - Açıklayıcı başlık ve açıklama ekle
    - İlgili issue'ları referans et
 
-5. **Code review beklenir:**
+5. **CI Pipeline kontrolü:**
+   - PR oluşturulduğunda CI otomatik çalışır
+   - Tüm CI kontrolleri geçmeli (yeşil ✓)
+   - CI başarısız olursa düzeltmeler yapılmalı
+
+6. **Code review beklenir:**
    - Review sonrası değişiklikler yapılabilir
+   - CI kontrolleri tekrar çalışır
    - Onaylandıktan sonra merge edilir
 
 ### PR Şablonu
@@ -224,12 +329,15 @@ Closes #123
 
 PR göndermeden önce:
 
-- [ ] Kod ESLint kurallarına uyuyor
-- [ ] TypeScript hataları yok
+- [ ] Kod ESLint kurallarına uyuyor (`pnpm lint`)
+- [ ] TypeScript hataları yok (`pnpm exec tsc --noEmit`)
+- [ ] Build başarılı (`pnpm build`)
+- [ ] Prisma schema geçerli (`pnpm prisma validate`)
 - [ ] Testler geçiyor (varsa)
 - [ ] Dokümantasyon güncellendi (gerekirse)
 - [ ] Commit mesajları conventional commits formatında
 - [ ] Breaking changes varsa belirtildi
+- [ ] CI pipeline başarılı (GitHub Actions'da yeşil ✓)
 
 ## 🐛 Hata Bildirimi
 
@@ -256,6 +364,7 @@ Yeni özellik önermek için:
 - [Next.js Docs](https://nextjs.org/docs)
 - [Prisma Docs](https://www.prisma.io/docs)
 - [shadcn/ui](https://ui.shadcn.com)
+- [GitHub Actions Docs](https://docs.github.com/en/actions)
 
 Teşekkürler! 🎉
 
