@@ -128,13 +128,20 @@ BREAKING CHANGE: Authentication endpoint moved from /auth/login to /api/auth/sig
 - `fix/ui-button-styling`
 - `refactor/db-prisma-client`
 
-### Branch Tipleri
+### Branch Tipleri ve Kullanımı
 
-- `main` - Production-ready kod
-- `develop` - Development branch (varsa)
-- `feat/*` - Yeni özellikler
-- `fix/*` - Hata düzeltmeleri
-- `refactor/*` - Refaktörler
+| Branch Tipi | Açıklama | CI/CD | Kullanım |
+|------------|----------|-------|----------|
+| `main` | Production-ready kod | ✅ Push & PR | Sadece release'ler için |
+| `develop` | Development branch | ✅ Push & PR | Ana development branch |
+| `feat/**` | Yeni özellikler | ✅ Push | Feature geliştirme |
+| `fix/**` | Hata düzeltmeleri | ✅ Push | Bug fix'ler |
+| `refactor/**` | Kod refaktörü | ✅ Push | Kod iyileştirmeleri |
+| `release/**` | Release hazırlığı | ✅ Push & PR | Yeni versiyon hazırlığı |
+| `hotfix/**` | Acil düzeltmeler | ✅ Push | Production bug fix'ler |
+| `t&q` | Test & QA | ✅ Push & PR | Test ve kalite kontrol |
+
+**Not:** Tüm branch'lerde push yapıldığında CI otomatik çalışır. Pull Request'ler sadece `main`, `develop`, `release/**` ve `t&q` branch'lerine açılabilir.
 
 ## 💻 Kod Standartları
 
@@ -196,21 +203,11 @@ CI pipeline şu kontrolleri yapar:
 
 ### CI Çalıştığı Branch'ler
 
-CI pipeline şu branch'lerde otomatik çalışır:
+CI pipeline otomatik olarak çalışır. Detaylı branch stratejisi için [Branch Stratejisi](#-branch-stratejisi) bölümüne bakın.
 
-**Push için:**
-- `main`
-- `develop`
-- `feat/**` (tüm feature branch'leri)
-- `release/**` (tüm release branch'leri)
-- `hotfix/**` (tüm hotfix branch'leri)
-- `t&q` (test & QA branch'i)
-
-**Pull Request için:**
-- `main`
-- `develop`
-- `release/**`
-- `t&q`
+**Özet:**
+- **Push:** Tüm branch tiplerinde (`main`, `develop`, `feat/**`, `fix/**`, `refactor/**`, `release/**`, `hotfix/**`, `t&q`)
+- **Pull Request:** Sadece `main`, `develop`, `release/**` ve `t&q` branch'lerine açılan PR'larda
 
 ### CI Başarısız Olursa
 
