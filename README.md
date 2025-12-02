@@ -191,6 +191,40 @@ refactor(db): simplify Prisma client initialization
 
 Daha fazla bilgi için [CONTRIBUTING.md](./CONTRIBUTING.md) dosyasına bakın.
 
+## 🔄 CI/CD
+
+Proje GitHub Actions ile CI/CD pipeline'ı kullanır.
+
+### Workflow'lar
+
+- **CI Pipeline** (`ci.yml`): Her push ve pull request'te çalışır
+  - ESLint kontrolü
+  - TypeScript type checking
+  - Production build testi
+  - Prisma schema validation
+
+- **CodeQL Analysis** (`codeql.yml`): Güvenlik analizi
+  - JavaScript/TypeScript kod analizi
+  - Güvenlik açıklarını tespit eder
+
+### Çalıştığı Branch'ler
+
+Workflow'lar şu branch'lerde çalışır:
+- `main` - Production branch
+- `develop` - Development branch
+- `feat/**` - Feature branch'leri
+- `release/**` - Release branch'leri
+- `hotfix/**` - Hotfix branch'leri
+- `t&q` - Test & QA branch'i
+
+### Workflow Durumu
+
+GitHub Actions badge'ini README'ye ekleyebilirsiniz:
+
+```markdown
+![CI](https://github.com/username/neuGPA/workflows/CI/badge.svg)
+```
+
 ## 🚢 Deployment
 
 ### Vercel (Önerilen)
