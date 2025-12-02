@@ -22,6 +22,8 @@ jobs:
   lint-and-typecheck:
     name: Lint & Type Check
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "file:./dev.db"
     
     steps:
       - name: Checkout code
@@ -61,6 +63,10 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     needs: lint-and-typecheck
+    env:
+      DATABASE_URL: "file:./dev.db"
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXTAUTH_SECRET: "ci-test-secret-key"
     
     steps:
       - name: Checkout code
@@ -82,6 +88,8 @@ jobs:
 
       - name: Generate Prisma Client
         run: pnpm db:generate
+        env:
+          DATABASE_URL: "file:./dev.db"
 
       - name: Build application
         run: pnpm build
@@ -93,6 +101,8 @@ jobs:
   database:
     name: Database Migration Check
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "file:./dev.db"
     
     steps:
       - name: Checkout code
