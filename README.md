@@ -55,8 +55,15 @@ neuGPA/
 │
 ├── hooks/                    # Custom React hooks
 │
+├── .github/                  # GitHub yapılandırmaları
+│   └── workflows/           # GitHub Actions workflow'ları
+│
 ├── public/                   # Statik dosyalar
 │
+├── prisma.config.ts          # Prisma yapılandırma dosyası
+├── next.config.ts            # Next.js yapılandırma dosyası
+├── tsconfig.json             # TypeScript yapılandırma dosyası
+├── components.json           # shadcn/ui yapılandırma dosyası
 └── .env                      # Ortam değişkenleri (git'e eklenmez)
 ```
 
