@@ -1,4 +1,4 @@
-# neuGPA - Not Hesaplama Sistemi
+# GPA - Not Hesaplama Sistemi
 
 Modern ve kullanıcı dostu bir not hesaplama uygulaması. Kısa sınav, vize ve final notlarınızı hesaplayın, derslerinizi yönetin ve not ortalamalarınızı takip edin.
 
@@ -30,7 +30,7 @@ Modern ve kullanıcı dostu bir not hesaplama uygulaması. Kısa sınav, vize ve
 ## 📁 Proje Yapısı
 
 ```
-neuGPA/
+gpa/
 ├── app/                      # Next.js App Router
 │   ├── api/                  # API Routes
 │   │   └── auth/             # NextAuth API routes
@@ -79,7 +79,7 @@ neuGPA/
 1. **Projeyi klonlayın:**
    ```bash
    git clone <repository-url>
-   cd neuGPA
+   cd gpa
    ```
 
 2. **Bağımlılıkları yükleyin:**
@@ -229,7 +229,7 @@ Workflow'lar şu branch'lerde çalışır:
 GitHub Actions badge'ini README'ye ekleyebilirsiniz:
 
 ```markdown
-![CI](https://github.com/username/neuGPA/workflows/CI/badge.svg)
+![CI](https://github.com/username/gpa/workflows/CI/badge.svg)
 ```
 
 ## 🚢 Deployment

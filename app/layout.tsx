@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "neuGPA - Not Hesaplama Sistemi",
+  title: "GPA - Not Hesaplama Sistemi",
   description: "Kısa sınav, vize ve final notlarınızı hesaplayın, derslerinizi yönetin",
 };
 

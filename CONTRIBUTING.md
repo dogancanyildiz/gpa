@@ -1,6 +1,6 @@
 # Katkıda Bulunma Rehberi
 
-neuGPA projesine katkıda bulunmak istediğiniz için teşekkürler! Bu rehber, projeye nasıl katkıda bulunabileceğinizi açıklar.
+GPA projesine katkıda bulunmak istediğiniz için teşekkürler! Bu rehber, projeye nasıl katkıda bulunabileceğinizi açıklar.
 
 ## 📋 İçindekiler
 
