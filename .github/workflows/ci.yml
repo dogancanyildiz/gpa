@@ -102,6 +102,8 @@ jobs:
 
       - name: Check Prisma schema
         run: pnpm prisma validate
+        env:
+          DATABASE_URL: "file:./dev.db"
 
       - name: Check migration status
         run: pnpm prisma migrate status
