@@ -22,10 +22,8 @@ Modern ve kullanıcı dostu bir not hesaplama uygulaması. Kısa sınav, vize ve
 
 - **Backend:**
   - Next.js API Routes
-  - Prisma ORM
-  - SQLite (Development) / PostgreSQL (Production)
+  - Supabase (Database & Authentication)
   - NextAuth.js (Authentication)
-  - bcryptjs (Password Hashing)
 
 ## 📁 Proje Yapısı
 
@@ -43,15 +41,12 @@ gpa/
 │
 ├── lib/                      # Yardımcı fonksiyonlar
 │   ├── auth.ts              # NextAuth yapılandırması
-│   ├── db.ts                # Prisma Client
+│   ├── supabase/            # Supabase client'ları
 │   └── utils.ts             # Utility fonksiyonlar
 │
-├── prisma/                   # Prisma dosyaları
-│   ├── schema.prisma        # Veritabanı şeması
-│   └── migrations/          # Veritabanı migration'ları
-│
 ├── types/                    # TypeScript tip tanımları
-│   └── next-auth.d.ts       # NextAuth tip genişletmeleri
+│   ├── next-auth.d.ts       # NextAuth tip genişletmeleri
+│   └── supabase.ts          # Supabase tip tanımları
 │
 ├── hooks/                    # Custom React hooks
 │
@@ -60,7 +55,6 @@ gpa/
 │
 ├── public/                   # Statik dosyalar
 │
-├── prisma.config.ts          # Prisma yapılandırma dosyası
 ├── next.config.ts            # Next.js yapılandırma dosyası
 ├── tsconfig.json             # TypeScript yapılandırma dosyası
 ├── components.json           # shadcn/ui yapılandırma dosyası
@@ -94,22 +88,13 @@ gpa/
    
    `.env` dosyasını düzenleyin:
    ```env
-   DATABASE_URL="file:./dev.db"
+   NEXT_PUBLIC_SUPABASE_URL="your-supabase-url"
+   NEXT_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
    NEXTAUTH_URL="http://localhost:3000"
    NEXTAUTH_SECRET="your-secret-key-here"
    ```
 
-4. **Veritabanını oluşturun:**
-   ```bash
-   pnpm db:migrate
-   ```
-
-5. **Prisma Client'ı generate edin:**
-   ```bash
-   pnpm db:generate
-   ```
-
-6. **Development server'ı başlatın:**
+4. **Development server'ı başlatın:**
    ```bash
    pnpm dev
    ```
@@ -124,12 +109,6 @@ pnpm dev              # Development server başlat
 pnpm build            # Production build oluştur
 pnpm start            # Production server başlat
 pnpm lint             # ESLint çalıştır
-
-# Veritabanı
-pnpm db:generate      # Prisma Client generate et
-pnpm db:migrate       # Migration oluştur ve uygula
-pnpm db:studio        # Prisma Studio'yu aç
-pnpm db:push          # Schema'yı veritabanına push et
 ```
 
 ## 🗄️ Veritabanı Şeması
@@ -193,7 +172,7 @@ Format: `<type>(<scope>): <subject>`
 feat(auth): add user registration endpoint
 fix(ui): correct button color in dark mode
 docs(readme): update installation instructions
-refactor(db): simplify Prisma client initialization
+refactor(supabase): update database client configuration
 ```
 
 Daha fazla bilgi için [CONTRIBUTING.md](./CONTRIBUTING.md) dosyasına bakın.
@@ -208,7 +187,6 @@ Proje GitHub Actions ile CI/CD pipeline'ı kullanır.
   - ESLint kontrolü
   - TypeScript type checking
   - Production build testi
-  - Prisma schema validation
 
 - **CodeQL Analysis** (`codeql.yml`): Güvenlik analizi
   - JavaScript/TypeScript kod analizi
@@ -241,7 +219,8 @@ GitHub Actions badge'ini README'ye ekleyebilirsiniz:
 3. "New Project" butonuna tıklayın
 4. Repository'nizi seçin
 5. Environment variables'ları ekleyin:
-   - `DATABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `NEXTAUTH_URL`
    - `NEXTAUTH_SECRET`
 6. Deploy edin!

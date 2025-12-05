@@ -72,7 +72,7 @@ docs(readme): update installation instructions
 docs(api): add endpoint documentation
 
 # Refaktör
-refactor(db): simplify Prisma client initialization
+refactor(supabase): update database client configuration
 refactor(ui): extract reusable form components
 
 # Stil
@@ -126,7 +126,7 @@ BREAKING CHANGE: Authentication endpoint moved from /auth/login to /api/auth/sig
 Örnekler:
 - `feat/auth-user-registration`
 - `fix/ui-button-styling`
-- `refactor/db-prisma-client`
+- `refactor/supabase-client`
 
 ### Branch Tipleri ve Kullanımı
 
@@ -173,7 +173,7 @@ BREAKING CHANGE: Authentication endpoint moved from /auth/login to /api/auth/sig
 
 ```typescript
 import { NextRequest } from 'next/server'
-import { prisma } from '@/lib/db'
+import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import type { User } from '@/types'
 ```
@@ -193,13 +193,7 @@ CI pipeline şu kontrolleri yapar:
 
 2. **Build Test**
    - Production build testi
-   - Prisma Client generate kontrolü
    - Build hatalarının tespiti
-
-3. **Database Migration Check**
-   - Prisma schema validation
-   - Migration status kontrolü
-   - Veritabanı yapısı doğrulama
 
 ### CI Çalıştığı Branch'ler
 
@@ -254,9 +248,6 @@ pnpm exec tsc --noEmit
 
 # Build testi
 pnpm build
-
-# Prisma schema validation
-pnpm prisma validate
 ```
 
 ### CodeQL Security Analysis
@@ -329,7 +320,6 @@ PR göndermeden önce:
 - [ ] Kod ESLint kurallarına uyuyor (`pnpm lint`)
 - [ ] TypeScript hataları yok (`pnpm exec tsc --noEmit`)
 - [ ] Build başarılı (`pnpm build`)
-- [ ] Prisma schema geçerli (`pnpm prisma validate`)
 - [ ] Testler geçiyor (varsa)
 - [ ] Dokümantasyon güncellendi (gerekirse)
 - [ ] Commit mesajları conventional commits formatında
@@ -359,7 +349,7 @@ Yeni özellik önermek için:
 
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - [Next.js Docs](https://nextjs.org/docs)
-- [Prisma Docs](https://www.prisma.io/docs)
+- [Supabase Docs](https://supabase.com/docs)
 - [shadcn/ui](https://ui.shadcn.com)
 - [GitHub Actions Docs](https://docs.github.com/en/actions)
 
