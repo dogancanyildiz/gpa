@@ -46,9 +46,9 @@ export function GradeForm({ grade, courses, onSubmit, onCancel }: GradeFormProps
   // React Hook Form's watch() cannot be memoized safely, but it's safe to use here
   // eslint-disable-next-line react-hooks/incompatible-library
   const midterm = form.watch("midterm") || 0
-  // eslint-disable-next-line react-hooks/incompatible-library
+   
   const quiz = form.watch("quiz") || 0
-  // eslint-disable-next-line react-hooks/incompatible-library
+   
   const final = form.watch("final") || 0
 
   // Calculate grade in real-time
