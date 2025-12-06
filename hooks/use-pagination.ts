@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 
 interface UsePaginationProps<T> {
   data: T[]
@@ -7,21 +7,40 @@ interface UsePaginationProps<T> {
 
 export function usePagination<T>({ data, itemsPerPage = 10 }: UsePaginationProps<T>) {
   const [currentPage, setCurrentPage] = useState(1)
+  const prevDataLengthRef = useRef(data.length)
 
   const totalPages = Math.max(1, Math.ceil(data.length / itemsPerPage))
 
-  // Reset to page 1 when data length changes and current page is out of bounds
+  // Ensure currentPage is valid - calculate valid page without side effects
+  const validCurrentPage = useMemo(() => {
+    return Math.min(Math.max(1, currentPage), totalPages)
+  }, [currentPage, totalPages])
+
+  // Reset to page 1 when data shrinks and current page is out of bounds
+  // Use useEffect to sync state when data length changes
+  // This is necessary to reset pagination when filters reduce data size
   useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(1)
+    const prevDataLength = prevDataLengthRef.current
+    if (data.length !== prevDataLength) {
+      prevDataLengthRef.current = data.length
+      // Only reset if current page is out of bounds
+      if (currentPage > totalPages && totalPages > 0) {
+        // Use setTimeout to avoid calling setState synchronously in effect
+        // This prevents cascading renders while still resetting the page
+        const timeoutId = setTimeout(() => {
+          setCurrentPage(1)
+        }, 0)
+        return () => clearTimeout(timeoutId)
+      }
     }
   }, [data.length, currentPage, totalPages])
 
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage
+    const page = validCurrentPage
+    const startIndex = (page - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
     return data.slice(startIndex, endIndex)
-  }, [data, currentPage, itemsPerPage])
+  }, [data, validCurrentPage, itemsPerPage])
 
   const goToPage = (page: number) => {
     const validPage = Math.max(1, Math.min(page, totalPages))
@@ -46,17 +65,17 @@ export function usePagination<T>({ data, itemsPerPage = 10 }: UsePaginationProps
   }
 
   return {
-    currentPage,
+    currentPage: validCurrentPage,
     totalPages,
     paginatedData,
     goToPage,
     nextPage,
     previousPage,
     resetPagination,
-    hasNextPage: currentPage < totalPages,
-    hasPreviousPage: currentPage > 1,
-    startIndex: (currentPage - 1) * itemsPerPage,
-    endIndex: Math.min(currentPage * itemsPerPage, data.length),
+    hasNextPage: validCurrentPage < totalPages,
+    hasPreviousPage: validCurrentPage > 1,
+    startIndex: (validCurrentPage - 1) * itemsPerPage,
+    endIndex: Math.min(validCurrentPage * itemsPerPage, data.length),
     totalItems: data.length,
   }
 }
