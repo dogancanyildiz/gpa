@@ -4,17 +4,29 @@
  * Register service worker for offline support
  */
 export function registerServiceWorker() {
-  if (typeof window !== "undefined" && "serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker
-        .register("/sw.js")
-        .then((registration) => {
-          console.log("Service Worker registered:", registration.scope)
-        })
-        .catch((error) => {
-          console.error("Service Worker registration failed:", error)
-        })
-    })
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+    return
+  }
+
+  // If page is already loaded, register immediately
+  // Otherwise, wait for load event
+  const register = () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration) => {
+        console.log("Service Worker registered:", registration.scope)
+      })
+      .catch((error) => {
+        console.error("Service Worker registration failed:", error)
+      })
+  }
+
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    // Page is already loaded or loading, register immediately
+    register()
+  } else {
+    // Page is still loading, wait for load event
+    window.addEventListener("load", register)
   }
 }
 
