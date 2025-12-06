@@ -35,7 +35,9 @@ export function TranscriptView({ courses, grades }: TranscriptViewProps) {
       })
       .filter((item): item is NonNullable<typeof item> => item !== null)
       .sort((a, b) => {
-        // Sort by course name
+        // Sort by semester first (newest first), then by course name
+        const semesterCompare = b.course.semester.localeCompare(a.course.semester)
+        if (semesterCompare !== 0) return semesterCompare
         return a.course.name.localeCompare(b.course.name, "tr")
       })
   }, [courses, grades])
@@ -70,6 +72,7 @@ export function TranscriptView({ courses, grades }: TranscriptViewProps) {
             <TableRow>
               <TableHead>Ders Adı</TableHead>
               <TableHead>Ders Kodu</TableHead>
+              <TableHead>Dönem</TableHead>
               <TableHead className="text-right">AKTS</TableHead>
               <TableHead className="text-right">Vize</TableHead>
               <TableHead className="text-right">Kısa Sınav</TableHead>
@@ -89,6 +92,11 @@ export function TranscriptView({ courses, grades }: TranscriptViewProps) {
                   ) : (
                     "-"
                   )}
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="text-xs">
+                    {course.semester}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-right">{course.credit}</TableCell>
                 <TableCell className="text-right">

@@ -42,7 +42,7 @@ export function DashboardOverview() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Ana Sayfa</h1>
         <p className="text-muted-foreground">
           Akademik performansınızın özeti ve hızlı erişim
         </p>
@@ -254,6 +254,9 @@ export function DashboardOverview() {
                               {course.code}
                             </Badge>
                           )}
+                          <Badge variant="outline" className="text-xs">
+                            {course.semester}
+                          </Badge>
                           <Badge variant="secondary" className="text-xs">
                             {course.credit} AKTS
                           </Badge>
