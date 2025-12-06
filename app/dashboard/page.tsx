@@ -1,10 +1,12 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
+import { DashboardOverview } from "@/components/dashboard-overview"
 import { GradeCalculator } from "@/components/grade-calculator"
 import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function Page() {
   return (
@@ -22,7 +24,18 @@ export default function Page() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 md:px-6">
-              <GradeCalculator />
+              <Tabs defaultValue="overview" className="space-y-4">
+                <TabsList>
+                  <TabsTrigger value="overview">Özet</TabsTrigger>
+                  <TabsTrigger value="calculator">Not Hesaplayıcı</TabsTrigger>
+                </TabsList>
+                <TabsContent value="overview" className="space-y-4">
+                  <DashboardOverview />
+                </TabsContent>
+                <TabsContent value="calculator" className="space-y-4">
+                  <GradeCalculator />
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
         </div>
