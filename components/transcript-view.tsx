@@ -37,7 +37,7 @@ export function TranscriptView({ courses, grades }: TranscriptViewProps) {
       .sort((a, b) => {
         // Sort by semester first (newest first), then by course name
         const semesterCompare = b.course.semester.localeCompare(a.course.semester)
-        if (semesterCompare !== 0) return semesterCompare
+        if (semesterCompare !== 0) return -semesterCompare
         return a.course.name.localeCompare(b.course.name, "tr")
       })
   }, [courses, grades])

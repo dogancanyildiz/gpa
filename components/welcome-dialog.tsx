@@ -18,6 +18,9 @@ export function WelcomeDialog() {
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
+    // Check if we're on the client side before accessing localStorage
+    if (typeof window === "undefined") return
+
     // Check if user has dismissed the dialog before
     const dismissed = localStorage.getItem(STORAGE_KEY)
     if (!dismissed) {
@@ -31,7 +34,7 @@ export function WelcomeDialog() {
 
   const handleDismiss = (dontShowAgain: boolean) => {
     setIsOpen(false)
-    if (dontShowAgain) {
+    if (dontShowAgain && typeof window !== "undefined") {
       localStorage.setItem(STORAGE_KEY, "true")
     }
   }
