@@ -45,6 +45,7 @@ export function GradeForm({ grade, courses, onSubmit, onCancel }: GradeFormProps
   })
 
   // React Hook Form's watch() returns current form values
+  // These cannot be memoized safely, but it's safe to use them directly
   const midterm = form.watch("midterm")
   const quiz = form.watch("quiz")
   const final = form.watch("final")

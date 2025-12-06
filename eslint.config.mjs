@@ -15,6 +15,13 @@ const eslintConfig = defineConfig([
     // Coverage files
     "coverage/**",
   ]),
+  {
+    rules: {
+      // Ignore React Compiler warnings for incompatible library APIs
+      // These are expected for TanStack Table and React Hook Form
+      "react-hooks/incompatible-library": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

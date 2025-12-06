@@ -365,6 +365,8 @@ export function DataTable({
     [data]
   )
 
+  // TanStack Table's useReactTable returns functions that cannot be memoized safely
+  // This is expected behavior and safe to use
   const table = useReactTable({
     data,
     columns,
