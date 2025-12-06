@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { OfflineProvider } from "@/components/offline-provider";
+import { WelcomeDialog } from "@/components/welcome-dialog";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,8 +42,9 @@ export default function RootLayout({
             <OfflineProvider>
               {children}
             </OfflineProvider>
+            <WelcomeDialog />
+            <Toaster />
           </ErrorBoundary>
-          <Toaster />
         </ThemeProvider>
       </body>
     </html>
