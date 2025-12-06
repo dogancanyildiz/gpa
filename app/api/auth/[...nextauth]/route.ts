@@ -2,6 +2,12 @@
 export const dynamic = 'force-static'
 export const revalidate = false
 
+// Dynamic route için generateStaticParams gerekli (static export için)
+export function generateStaticParams() {
+  // API route'u static export'ta kullanmayacağız, boş array döndür
+  return []
+}
+
 // GitHub Pages için static export - API routes çalışmaz
 // Bu route sadece static export için 404 döndürür
 export async function GET() {
