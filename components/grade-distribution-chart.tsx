@@ -86,8 +86,8 @@ export function GradeDistributionChart({ data }: GradeDistributionChartProps) {
           />
           <Legend
             formatter={(value, entry) => {
-              if (entry?.payload) {
-                const payload = entry.payload as GradeDistributionData
+              if (entry?.payload && typeof entry.payload === 'object' && 'value' in entry.payload) {
+                const payload = entry.payload as unknown as GradeDistributionData
                 return `${value} (${payload.value})`
               }
               return value
