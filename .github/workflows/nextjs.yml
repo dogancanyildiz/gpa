@@ -72,9 +72,9 @@ jobs:
       - name: Remove API routes for static export
         run: |
           # API routes are not compatible with static export
-          # Temporarily rename the API route directory
+          # Move API route directory outside of app folder
           if [ -d "app/api" ]; then
-            mv app/api app/api.disabled || true
+            mv app/api .api-backup || true
           fi
 
       - name: Build with Next.js
@@ -86,8 +86,8 @@ jobs:
         if: always()
         run: |
           # Restore API routes after build
-          if [ -d "app/api.disabled" ]; then
-            mv app/api.disabled app/api || true
+          if [ -d ".api-backup" ]; then
+            mv .api-backup app/api || true
           fi
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
