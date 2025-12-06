@@ -16,12 +16,32 @@ export const gradeSchema = z.object({
 export type Grade = z.infer<typeof gradeSchema>
 
 // Form schema (without id, totalScore, letterGrade and timestamps)
-export const gradeFormSchema = gradeSchema.omit({
-  id: true,
-  totalScore: true,
-  letterGrade: true,
-  createdAt: true,
-  updatedAt: true,
+export const gradeFormSchema = z.object({
+  courseId: z.string().uuid("Geçerli bir ders seçmelisiniz"),
+  midterm: z
+    .number({
+      message: "Vize notu bir sayı olmalıdır",
+    })
+    .min(0, "Vize notu 0'dan küçük olamaz")
+    .max(100, "Vize notu 100'den büyük olamaz")
+    .optional()
+    .or(z.literal(undefined)),
+  quiz: z
+    .number({
+      message: "Kısa sınav notu bir sayı olmalıdır",
+    })
+    .min(0, "Kısa sınav notu 0'dan küçük olamaz")
+    .max(100, "Kısa sınav notu 100'den büyük olamaz")
+    .optional()
+    .or(z.literal(undefined)),
+  final: z
+    .number({
+      message: "Final notu bir sayı olmalıdır",
+    })
+    .min(0, "Final notu 0'dan küçük olamaz")
+    .max(100, "Final notu 100'den büyük olamaz")
+    .optional()
+    .or(z.literal(undefined)),
 })
 
 export type GradeFormData = z.infer<typeof gradeFormSchema>

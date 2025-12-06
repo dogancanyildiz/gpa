@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
+import { LoadingButton } from "@/components/loading-button"
 import {
   Form,
   FormControl,
@@ -38,9 +39,13 @@ export function CourseForm({ course, onSubmit, onCancel }: CourseFormProps) {
     },
   })
 
-  const handleSubmit = (data: CourseFormData) => {
-    onSubmit(data)
-    form.reset()
+  const handleSubmit = async (data: CourseFormData) => {
+    try {
+      await Promise.resolve(onSubmit(data))
+      form.reset()
+    } catch {
+      // Error handling is done in parent component
+    }
   }
 
   return (
@@ -53,10 +58,17 @@ export function CourseForm({ course, onSubmit, onCancel }: CourseFormProps) {
             <FormItem>
               <FormLabel>Ders Adı *</FormLabel>
               <FormControl>
-                <Input placeholder="Örn: Veri Yapıları ve Algoritmalar" {...field} />
+                <Input
+                  placeholder="Örn: Veri Yapıları ve Algoritmalar"
+                  {...field}
+                  onBlur={(e) => {
+                    field.onBlur()
+                    field.onChange(e.target.value.trim())
+                  }}
+                />
               </FormControl>
               <FormDescription>
-                Dersin tam adını girin
+                Dersin tam adını girin (1-100 karakter)
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -70,10 +82,19 @@ export function CourseForm({ course, onSubmit, onCancel }: CourseFormProps) {
             <FormItem>
               <FormLabel>Ders Kodu</FormLabel>
               <FormControl>
-                <Input placeholder="Örn: CSE201" {...field} />
+                <Input
+                  placeholder="Örn: CSE201"
+                  {...field}
+                  value={field.value || ""}
+                  onBlur={(e) => {
+                    field.onBlur()
+                    const trimmed = e.target.value.trim()
+                    field.onChange(trimmed.length > 0 ? trimmed : undefined)
+                  }}
+                />
               </FormControl>
               <FormDescription>
-                Ders kodunu girin (opsiyonel)
+                Ders kodunu girin (opsiyonel, max 20 karakter)
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -113,13 +134,22 @@ export function CourseForm({ course, onSubmit, onCancel }: CourseFormProps) {
 
         <div className="flex justify-end gap-2 pt-4">
           {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={form.formState.isSubmitting}
+            >
               İptal
             </Button>
           )}
-          <Button type="submit">
+          <LoadingButton
+            type="submit"
+            loading={form.formState.isSubmitting}
+            loadingText={course ? "Güncelleniyor..." : "Ekleniyor..."}
+          >
             {course ? "Güncelle" : "Ekle"}
-          </Button>
+          </LoadingButton>
         </div>
       </form>
     </Form>

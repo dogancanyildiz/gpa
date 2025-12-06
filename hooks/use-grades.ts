@@ -4,6 +4,16 @@ import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import type { Grade, GradeFormData } from "@/types/grade"
 import { gradeSchema, calculateGrade } from "@/types/grade"
+import {
+  handleStorageError,
+  getErrorMessage,
+  isLocalStorageAvailable,
+  ValidationError,
+} from "@/lib/error-handler"
+import {
+  validateGradeForm,
+  validateGradeBusinessRules,
+} from "@/lib/validation"
 
 const STORAGE_KEY = "gpa-grades"
 
@@ -13,6 +23,12 @@ export function useGrades() {
 
   // Load grades from localStorage
   useEffect(() => {
+    if (!isLocalStorageAvailable()) {
+      toast.error("Tarayıcınız localStorage'ı desteklemiyor")
+      setIsLoading(false)
+      return
+    }
+
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
@@ -28,8 +44,9 @@ export function useGrades() {
         setGrades(validated)
       }
     } catch (error) {
-      console.error("Error loading grades:", error)
-      toast.error("Notlar yüklenirken bir hata oluştu")
+      const storageError = handleStorageError(error, "Notlar yüklenirken")
+      console.error("Error loading grades:", storageError)
+      toast.error(getErrorMessage(storageError))
     } finally {
       setIsLoading(false)
     }
@@ -37,43 +54,75 @@ export function useGrades() {
 
   // Save grades to localStorage
   const saveGrades = useCallback((newGrades: Grade[]) => {
+    if (!isLocalStorageAvailable()) {
+      toast.error("Tarayıcınız localStorage'ı desteklemiyor")
+      return
+    }
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newGrades))
       setGrades(newGrades)
     } catch (error) {
-      console.error("Error saving grades:", error)
-      toast.error("Notlar kaydedilirken bir hata oluştu")
+      const storageError = handleStorageError(error, "Notlar kaydedilirken")
+      console.error("Error saving grades:", storageError)
+      toast.error(getErrorMessage(storageError))
+      throw storageError
     }
   }, [])
 
   // Add new grade
   const addGrade = useCallback(
     (data: GradeFormData) => {
+      // Validate form data
+      const formValidation = validateGradeForm(data)
+      if (!formValidation.success) {
+        const errorMessages = formValidation.errors?.issues
+          .map((e: { message: string }) => e.message)
+          .join(", ")
+        toast.error(`Form hatası: ${errorMessages}`)
+        return false
+      }
+
+      // Validate business rules
+      const businessValidation = validateGradeBusinessRules(
+        formValidation.data!,
+        grades
+      )
+      if (!businessValidation.valid) {
+        toast.error(businessValidation.errors.join(", "))
+        return false
+      }
+
       // Calculate total score and letter grade
       const calculation = calculateGrade(
-        data.midterm || 0,
-        data.quiz || 0,
-        data.final || 0
+        formValidation.data!.midterm || 0,
+        formValidation.data!.quiz || 0,
+        formValidation.data!.final || 0
       )
 
       const newGrade: Grade = {
-        ...data,
+        ...formValidation.data!,
         id: crypto.randomUUID(),
         totalScore: calculation.totalScore || undefined,
         letterGrade: calculation.letterGrade || undefined,
         createdAt: new Date().toISOString(),
       }
 
+      // Final validation with Zod schema
       const validated = gradeSchema.safeParse(newGrade)
       if (!validated.success) {
-        toast.error("Geçersiz not verisi")
+        const error = new ValidationError("Geçersiz not verisi", validated.error.issues)
+        toast.error(getErrorMessage(error))
         return false
       }
 
-      const updatedGrades = [...grades, validated.data]
-      saveGrades(updatedGrades)
-      toast.success("Not başarıyla eklendi")
-      return true
+      try {
+        saveGrades([...grades, validated.data])
+        toast.success("Not başarıyla eklendi")
+        return true
+      } catch {
+        return false
+      }
     },
     [grades, saveGrades]
   )
@@ -81,18 +130,39 @@ export function useGrades() {
   // Update existing grade
   const updateGrade = useCallback(
     (id: string, data: GradeFormData) => {
+      // Validate form data
+      const formValidation = validateGradeForm(data)
+      if (!formValidation.success) {
+        const errorMessages = formValidation.errors?.issues
+          .map((e: { message: string }) => e.message)
+          .join(", ")
+        toast.error(`Form hatası: ${errorMessages}`)
+        return false
+      }
+
+      // Validate business rules (excluding current grade)
+      const businessValidation = validateGradeBusinessRules(
+        formValidation.data!,
+        grades,
+        id
+      )
+      if (!businessValidation.valid) {
+        toast.error(businessValidation.errors.join(", "))
+        return false
+      }
+
       // Calculate total score and letter grade
       const calculation = calculateGrade(
-        data.midterm || 0,
-        data.quiz || 0,
-        data.final || 0
+        formValidation.data!.midterm || 0,
+        formValidation.data!.quiz || 0,
+        formValidation.data!.final || 0
       )
 
       const updatedGrades = grades.map((grade) =>
         grade.id === id
           ? {
               ...grade,
-              ...data,
+              ...formValidation.data!,
               totalScore: calculation.totalScore || undefined,
               letterGrade: calculation.letterGrade || undefined,
               updatedAt: new Date().toISOString(),
@@ -104,13 +174,26 @@ export function useGrades() {
       const validated = updatedGrades
         .map((grade) => {
           const result = gradeSchema.safeParse(grade)
-          return result.success ? result.data : null
+          if (!result.success) {
+            console.error("Invalid grade data:", grade, result.error)
+            return null
+          }
+          return result.data
         })
         .filter((grade): grade is Grade => grade !== null)
 
-      saveGrades(validated)
-      toast.success("Not başarıyla güncellendi")
-      return true
+      if (validated.length !== updatedGrades.length) {
+        toast.error("Güncelleme başarısız: Geçersiz veri")
+        return false
+      }
+
+      try {
+        saveGrades(validated)
+        toast.success("Not başarıyla güncellendi")
+        return true
+      } catch {
+        return false
+      }
     },
     [grades, saveGrades]
   )

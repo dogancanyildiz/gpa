@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
+import { LoadingButton } from "@/components/loading-button"
 import {
   Form,
   FormControl,
@@ -54,14 +55,20 @@ export function GradeForm({ grade, courses, onSubmit, onCancel }: GradeFormProps
   // Calculate grade in real-time
   const calculation = calculateGrade(midterm, quiz, final)
 
-  const handleSubmit = (data: GradeFormData) => {
-    onSubmit({
-      courseId: data.courseId,
-      midterm: data.midterm,
-      quiz: data.quiz,
-      final: data.final,
-    })
-    form.reset()
+  const handleSubmit = async (data: GradeFormData) => {
+    try {
+      await Promise.resolve(
+        onSubmit({
+          courseId: data.courseId,
+          midterm: data.midterm,
+          quiz: data.quiz,
+          final: data.final,
+        })
+      )
+      form.reset()
+    } catch {
+      // Error handling is done in parent component
+    }
   }
 
   return (
@@ -115,13 +122,20 @@ export function GradeForm({ grade, courses, onSubmit, onCancel }: GradeFormProps
                       step="0.01"
                       placeholder="0-100"
                       {...field}
-                      value={field.value || ""}
+                      value={field.value ?? ""}
                       onChange={(e) => {
                         const value = e.target.value === "" ? undefined : parseFloat(e.target.value)
+                        if (value !== undefined && (isNaN(value) || value < 0 || value > 100)) {
+                          return
+                        }
                         field.onChange(value)
                       }}
+                      onBlur={field.onBlur}
                     />
                   </FormControl>
+                  <FormDescription>
+                    Vize notunuzu girin (0-100 arası)
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -141,13 +155,20 @@ export function GradeForm({ grade, courses, onSubmit, onCancel }: GradeFormProps
                       step="0.01"
                       placeholder="0-100"
                       {...field}
-                      value={field.value || ""}
+                      value={field.value ?? ""}
                       onChange={(e) => {
                         const value = e.target.value === "" ? undefined : parseFloat(e.target.value)
+                        if (value !== undefined && (isNaN(value) || value < 0 || value > 100)) {
+                          return
+                        }
                         field.onChange(value)
                       }}
+                      onBlur={field.onBlur}
                     />
                   </FormControl>
+                  <FormDescription>
+                    Kısa sınav notunuzu girin (0-100 arası)
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -167,13 +188,20 @@ export function GradeForm({ grade, courses, onSubmit, onCancel }: GradeFormProps
                       step="0.01"
                       placeholder="0-100"
                       {...field}
-                      value={field.value || ""}
+                      value={field.value ?? ""}
                       onChange={(e) => {
                         const value = e.target.value === "" ? undefined : parseFloat(e.target.value)
+                        if (value !== undefined && (isNaN(value) || value < 0 || value > 100)) {
+                          return
+                        }
                         field.onChange(value)
                       }}
+                      onBlur={field.onBlur}
                     />
                   </FormControl>
+                  <FormDescription>
+                    Final notunuzu girin (0-100 arası)
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -215,13 +243,22 @@ export function GradeForm({ grade, courses, onSubmit, onCancel }: GradeFormProps
 
           <div className="flex justify-end gap-2 pt-4">
             {onCancel && (
-              <Button type="button" variant="outline" onClick={onCancel}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={form.formState.isSubmitting}
+              >
                 İptal
               </Button>
             )}
-            <Button type="submit">
+            <LoadingButton
+              type="submit"
+              loading={form.formState.isSubmitting}
+              loadingText={grade ? "Güncelleniyor..." : "Ekleniyor..."}
+            >
               {grade ? "Güncelle" : "Ekle"}
-            </Button>
+            </LoadingButton>
           </div>
         </form>
       </Form>

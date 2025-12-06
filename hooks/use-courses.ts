@@ -4,6 +4,16 @@ import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import type { Course, CourseFormData } from "@/types/course"
 import { courseSchema } from "@/types/course"
+import {
+  handleStorageError,
+  getErrorMessage,
+  isLocalStorageAvailable,
+  ValidationError,
+} from "@/lib/error-handler"
+import {
+  validateCourseForm,
+  validateCourseBusinessRules,
+} from "@/lib/validation"
 
 const STORAGE_KEY = "gpa-courses"
 
@@ -13,6 +23,12 @@ export function useCourses() {
 
   // Load courses from localStorage
   useEffect(() => {
+    if (!isLocalStorageAvailable()) {
+      toast.error("Tarayıcınız localStorage'ı desteklemiyor")
+      setIsLoading(false)
+      return
+    }
+
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
@@ -28,8 +44,9 @@ export function useCourses() {
         setCourses(validated)
       }
     } catch (error) {
-      console.error("Error loading courses:", error)
-      toast.error("Dersler yüklenirken bir hata oluştu")
+      const storageError = handleStorageError(error, "Dersler yüklenirken")
+      console.error("Error loading courses:", storageError)
+      toast.error(getErrorMessage(storageError))
     } finally {
       setIsLoading(false)
     }
@@ -37,34 +54,66 @@ export function useCourses() {
 
   // Save courses to localStorage
   const saveCourses = useCallback((newCourses: Course[]) => {
+    if (!isLocalStorageAvailable()) {
+      toast.error("Tarayıcınız localStorage'ı desteklemiyor")
+      return
+    }
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newCourses))
       setCourses(newCourses)
     } catch (error) {
-      console.error("Error saving courses:", error)
-      toast.error("Dersler kaydedilirken bir hata oluştu")
+      const storageError = handleStorageError(error, "Dersler kaydedilirken")
+      console.error("Error saving courses:", storageError)
+      toast.error(getErrorMessage(storageError))
+      throw storageError
     }
   }, [])
 
   // Add new course
   const addCourse = useCallback(
     (data: CourseFormData) => {
+      // Validate form data
+      const formValidation = validateCourseForm(data)
+      if (!formValidation.success) {
+        const errorMessages = formValidation.errors?.issues
+          .map((e: { message: string }) => e.message)
+          .join(", ")
+        toast.error(`Form hatası: ${errorMessages}`)
+        return false
+      }
+
+      // Validate business rules
+      const businessValidation = validateCourseBusinessRules(
+        formValidation.data!,
+        courses
+      )
+      if (!businessValidation.valid) {
+        toast.error(businessValidation.errors.join(", "))
+        return false
+      }
+
       const newCourse: Course = {
-        ...data,
+        ...formValidation.data!,
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
       }
 
+      // Final validation with Zod schema
       const validated = courseSchema.safeParse(newCourse)
       if (!validated.success) {
-        toast.error("Geçersiz ders verisi")
+        const error = new ValidationError("Geçersiz ders verisi", validated.error.issues)
+        toast.error(getErrorMessage(error))
         return false
       }
 
-      const updatedCourses = [...courses, validated.data]
-      saveCourses(updatedCourses)
-      toast.success("Ders başarıyla eklendi")
-      return true
+      try {
+        saveCourses([...courses, validated.data])
+        toast.success("Ders başarıyla eklendi")
+        return true
+      } catch {
+        return false
+      }
     },
     [courses, saveCourses]
   )
@@ -72,11 +121,32 @@ export function useCourses() {
   // Update existing course
   const updateCourse = useCallback(
     (id: string, data: CourseFormData) => {
+      // Validate form data
+      const formValidation = validateCourseForm(data)
+      if (!formValidation.success) {
+        const errorMessages = formValidation.errors?.issues
+          .map((e: { message: string }) => e.message)
+          .join(", ")
+        toast.error(`Form hatası: ${errorMessages}`)
+        return false
+      }
+
+      // Validate business rules (excluding current course)
+      const businessValidation = validateCourseBusinessRules(
+        formValidation.data!,
+        courses,
+        id
+      )
+      if (!businessValidation.valid) {
+        toast.error(businessValidation.errors.join(", "))
+        return false
+      }
+
       const updatedCourses = courses.map((course) =>
         course.id === id
           ? {
               ...course,
-              ...data,
+              ...formValidation.data!,
               updatedAt: new Date().toISOString(),
             }
           : course
@@ -86,13 +156,26 @@ export function useCourses() {
       const validated = updatedCourses
         .map((course) => {
           const result = courseSchema.safeParse(course)
-          return result.success ? result.data : null
+          if (!result.success) {
+            console.error("Invalid course data:", course, result.error)
+            return null
+          }
+          return result.data
         })
         .filter((course): course is Course => course !== null)
 
-      saveCourses(validated)
-      toast.success("Ders başarıyla güncellendi")
-      return true
+      if (validated.length !== updatedCourses.length) {
+        toast.error("Güncelleme başarısız: Geçersiz veri")
+        return false
+      }
+
+      try {
+        saveCourses(validated)
+        toast.success("Ders başarıyla güncellendi")
+        return true
+      } catch {
+        return false
+      }
     },
     [courses, saveCourses]
   )
