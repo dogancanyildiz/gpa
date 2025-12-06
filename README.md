@@ -27,11 +27,13 @@ Modern ve kullanıcı dostu bir not hesaplama uygulaması. Kısa sınav, vize ve
 
 ## 📁 Proje Yapısı
 
-```
+```text
 gpa/
 ├── app/                      # Next.js App Router
 │   ├── api/                  # API Routes
 │   │   └── auth/             # NextAuth API routes
+│   ├── dashboard/            # Dashboard sayfası
+│   │   └── page.tsx          # Dashboard ana sayfa
 │   ├── layout.tsx            # Root layout
 │   ├── page.tsx              # Ana sayfa
 │   └── globals.css           # Global stiller
@@ -45,8 +47,7 @@ gpa/
 │   └── utils.ts             # Utility fonksiyonlar
 │
 ├── types/                    # TypeScript tip tanımları
-│   ├── next-auth.d.ts       # NextAuth tip genişletmeleri
-│   └── supabase.ts          # Supabase tip tanımları
+│   └── next-auth.d.ts       # NextAuth tip genişletmeleri
 │
 ├── hooks/                    # Custom React hooks
 │
@@ -71,22 +72,22 @@ gpa/
 ### Kurulum
 
 1. **Projeyi klonlayın:**
+
    ```bash
    git clone <repository-url>
    cd gpa
    ```
 
 2. **Bağımlılıkları yükleyin:**
+
    ```bash
    pnpm install
    ```
 
 3. **Ortam değişkenlerini ayarlayın:**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   `.env` dosyasını düzenleyin:
+
+   Proje kök dizininde `.env` dosyası oluşturun ve aşağıdaki değişkenleri ekleyin:
+
    ```env
    NEXT_PUBLIC_SUPABASE_URL="your-supabase-url"
    NEXT_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
@@ -95,11 +96,12 @@ gpa/
    ```
 
 4. **Development server'ı başlatın:**
+
    ```bash
    pnpm dev
    ```
 
-7. Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini açın.
+5. Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini açın.
 
 ## 📜 Komutlar
 
@@ -114,6 +116,7 @@ pnpm lint             # ESLint çalıştır
 ## 🗄️ Veritabanı Şeması
 
 ### User (Kullanıcı)
+
 - `id`: Benzersiz kullanıcı ID
 - `email`: E-posta adresi (unique)
 - `name`: Kullanıcı adı
@@ -121,6 +124,7 @@ pnpm lint             # ESLint çalıştır
 - `courses`: Kullanıcının dersleri
 
 ### Course (Ders)
+
 - `id`: Benzersiz ders ID
 - `name`: Ders adı
 - `code`: Ders kodu (opsiyonel)
@@ -128,6 +132,7 @@ pnpm lint             # ESLint çalıştır
 - `assessments`: Dersin değerlendirmeleri
 
 ### Assessment (Değerlendirme)
+
 - `id`: Benzersiz değerlendirme ID
 - `type`: Değerlendirme tipi (quiz, midterm, final)
 - `name`: Değerlendirme adı
@@ -195,6 +200,7 @@ Proje GitHub Actions ile CI/CD pipeline'ı kullanır.
 ### Çalıştığı Branch'ler
 
 Workflow'lar şu branch'lerde çalışır:
+
 - `main` - Production branch
 - `develop` - Development branch
 - `feat/**` - Feature branch'leri
