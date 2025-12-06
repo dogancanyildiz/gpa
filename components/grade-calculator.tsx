@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { roundUpToInteger } from "@/lib/utils"
 
 interface GradeInfo {
   letter: string
@@ -87,7 +88,10 @@ export function GradeCalculator() {
     ? average + finalNum * 0.5 
     : null
 
-  const currentGrade = totalScore !== null ? getGradeLetter(totalScore) : null
+  // Harf notu hesaplama - yuvarlanmış değer üzerinden yapılır
+  // Böylece gösterilen not ile harf notu eşleşir (örn: 89.375 → 90 → AA)
+  const roundedScore = totalScore !== null ? Math.ceil(totalScore) : null
+  const currentGrade = roundedScore !== null ? getGradeLetter(roundedScore) : null
 
   // Final girilmediyse, her harf notu için gerekli final notunu hesapla
   const finalNeededForGrades = !hasFinal && midtermNum > 0 && quizNum > 0
@@ -172,7 +176,7 @@ export function GradeCalculator() {
             <div className="rounded-lg border-2 border-primary bg-primary/5 p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Toplam Not:</span>
-                <span className="text-2xl font-bold">{totalScore.toFixed(2)}</span>
+                <span className="text-2xl font-bold">{roundUpToInteger(totalScore)}</span>
               </div>
               {currentGrade ? (
               <div className="flex items-center justify-between">

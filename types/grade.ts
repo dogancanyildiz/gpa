@@ -1,5 +1,14 @@
 import { z } from "zod"
 
+/**
+ * Round a number up to the nearest integer
+ * @param value The number to round up
+ * @returns The rounded up integer value
+ */
+function roundUpToInteger(value: number): number {
+  return Math.ceil(value)
+}
+
 // Zod schema for grade validation
 export const gradeSchema = z.object({
   id: z.string().uuid(),
@@ -75,8 +84,10 @@ export function calculateGrade(
   // Final girildiyse toplam not hesaplama (final !== undefined kontrolü ile 0 değerini de kabul eder)
   const totalScore = final !== undefined ? average + final * 0.5 : null
   
-  // Harf notu hesaplama
-  const letterGrade = totalScore !== null ? getGradeLetter(totalScore) : null
+  // Harf notu hesaplama - yuvarlanmış değer üzerinden yapılır
+  // Böylece gösterilen not ile harf notu eşleşir (örn: 89.375 → 90 → AA)
+  const roundedScore = totalScore !== null ? roundUpToInteger(totalScore) : null
+  const letterGrade = roundedScore !== null ? getGradeLetter(roundedScore) : null
   
   return {
     totalScore,
