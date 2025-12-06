@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import type { Course } from "@/types/course"
 import type { Grade } from "@/types/grade"
 import { GRADE_SCALE } from "@/types/grade"
+import { roundUp, roundUpToInteger } from "@/lib/utils"
 
 interface TranscriptViewProps {
   courses: Course[]
@@ -110,7 +111,7 @@ export function TranscriptView({ courses, grades }: TranscriptViewProps) {
                 </TableCell>
                 <TableCell className="text-right">
                   {grade.totalScore !== undefined ? (
-                    <span className="font-semibold">{grade.totalScore.toFixed(2)}</span>
+                    <span className="font-semibold">{roundUpToInteger(grade.totalScore)}</span>
                   ) : (
                     "-"
                   )}
@@ -127,7 +128,7 @@ export function TranscriptView({ courses, grades }: TranscriptViewProps) {
                 <TableCell className="text-right">
                   {gpa > 0 ? (
                     <Badge variant={gpa >= 3.0 ? "default" : gpa >= 2.0 ? "secondary" : "destructive"}>
-                      {gpa.toFixed(2)}
+                      {roundUp(gpa)}
                     </Badge>
                   ) : (
                     "-"

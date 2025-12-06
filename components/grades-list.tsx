@@ -48,6 +48,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { usePagination } from "@/hooks/use-pagination"
+import { roundUpToInteger } from "@/lib/utils"
 
 export function GradesList() {
   const { grades, isLoading: gradesLoading, addGrade, updateGrade, deleteGrade } = useGrades()
@@ -337,7 +338,7 @@ export function GradesList() {
                     <TableCell className="text-right">
                       {grade.totalScore !== undefined ? (
                         <span className="font-semibold">
-                          {grade.totalScore.toFixed(2)}
+                          {roundUpToInteger(grade.totalScore)}
                         </span>
                       ) : (
                         "-"

@@ -10,6 +10,7 @@ import { useCourses } from "@/hooks/use-courses"
 import { useGrades } from "@/hooks/use-grades"
 import Link from "next/link"
 import { GradeDistributionChart } from "@/components/grade-distribution-chart"
+import { roundUp, roundUpToInteger } from "@/lib/utils"
 
 export function DashboardOverview() {
   const { statistics, gradeDistributionData } = useStatistics()
@@ -123,7 +124,7 @@ export function DashboardOverview() {
               <div className="text-2xl font-bold">
                 {statistics.totalGPA > 0 ? (
                   <span className={getGPAColor(statistics.totalGPA)}>
-                    {statistics.totalGPA.toFixed(2)}
+                    {roundUp(statistics.totalGPA)}
                   </span>
                 ) : (
                   <span className="text-muted-foreground">-</span>
@@ -312,7 +313,7 @@ export function DashboardOverview() {
                         <div className="flex items-center gap-2 mt-1">
                           {grade.totalScore !== undefined && (
                             <span className="text-sm text-muted-foreground">
-                              Toplam: <strong>{grade.totalScore.toFixed(2)}</strong>
+                              Toplam: <strong>{roundUpToInteger(grade.totalScore)}</strong>
                             </span>
                           )}
                           {grade.letterGrade && (

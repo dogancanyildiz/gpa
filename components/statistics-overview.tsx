@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCourses } from "@/hooks/use-courses"
 import { useGrades } from "@/hooks/use-grades"
+import { roundUp, roundUpToInteger } from "@/lib/utils"
 
 export function StatisticsOverview() {
   const { statistics, gradeDistributionData, coursePerformanceData } = useStatistics()
@@ -61,7 +62,7 @@ export function StatisticsOverview() {
               <div className="text-2xl font-bold">
                 {statistics.totalGPA > 0 ? (
                   <span className={getGPAColor(statistics.totalGPA)}>
-                    {statistics.totalGPA.toFixed(2)}
+                    {roundUp(statistics.totalGPA)}
                   </span>
                 ) : (
                   <span className="text-muted-foreground">-</span>
@@ -224,13 +225,13 @@ export function StatisticsOverview() {
                     {stat.grade && (
                       <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
                         <span>
-                          Toplam: <strong>{stat.grade.totalScore?.toFixed(2)}</strong>
+                          Toplam: <strong>{stat.grade.totalScore ? roundUpToInteger(stat.grade.totalScore) : "-"}</strong>
                         </span>
                         <span>
                           Harf: <strong>{stat.grade.letterGrade}</strong>
                         </span>
                         <span>
-                          GPA: <strong>{stat.gpa.toFixed(2)}</strong>
+                          GPA: <strong>{roundUp(stat.gpa)}</strong>
                         </span>
                       </div>
                     )}
@@ -238,7 +239,7 @@ export function StatisticsOverview() {
                   <div className="text-right">
                     {stat.grade ? (
                       <Badge variant={stat.gpa >= 3.0 ? "default" : stat.gpa >= 2.0 ? "secondary" : "destructive"}>
-                        {stat.gpa.toFixed(2)}
+                        {roundUp(stat.gpa)}
                       </Badge>
                     ) : (
                       <Badge variant="outline">Not girilmemiş</Badge>

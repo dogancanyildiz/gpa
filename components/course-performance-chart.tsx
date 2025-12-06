@@ -6,6 +6,7 @@ import {
   ChartContainer,
   ChartTooltip,
 } from "@/components/ui/chart"
+import { roundUp, roundUpToInteger } from "@/lib/utils"
 
 interface CoursePerformanceData {
   name: string
@@ -60,8 +61,8 @@ export function CoursePerformanceChart({ data }: CoursePerformanceChartProps) {
                         <span className="text-sm font-medium">{data.name}</span>
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        <div>GPA: <strong>{data.gpa.toFixed(2)}</strong></div>
-                        <div>Not: <strong>{data.score.toFixed(2)}</strong></div>
+                        <div>GPA: <strong>{roundUp(data.gpa)}</strong></div>
+                        <div>Not: <strong>{roundUpToInteger(data.score)}</strong></div>
                         <div>AKTS: <strong>{data.credits}</strong></div>
                       </div>
                     </div>

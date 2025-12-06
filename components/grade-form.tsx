@@ -25,6 +25,7 @@ import { gradeFormSchema, type GradeFormData, type Grade, calculateGrade } from 
 import type { Course } from "@/types/course"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { roundUpToInteger } from "@/lib/utils"
 
 interface GradeFormProps {
   grade?: Grade
@@ -223,7 +224,7 @@ export function GradeForm({ grade, courses, onSubmit, onCancel }: GradeFormProps
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">Toplam Not</p>
                     <p className="text-2xl font-bold">
-                      {calculation.totalScore.toFixed(2)}
+                      {roundUpToInteger(calculation.totalScore)}
                     </p>
                   </div>
                   {calculation.letterGrade && (

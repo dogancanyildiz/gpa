@@ -9,6 +9,7 @@ import { useStatistics } from "@/hooks/use-statistics"
 import { TranscriptView } from "@/components/transcript-view"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SkeletonTable } from "@/components/skeleton-table"
+import { roundUp } from "@/lib/utils"
 
 export function ReportsOverview() {
   const { courses, isLoading: coursesLoading } = useCourses()
@@ -58,7 +59,7 @@ export function ReportsOverview() {
               <div>
                 <p className="text-sm text-muted-foreground">Genel GPA</p>
                 <p className="text-2xl font-bold">
-                  {statistics.totalGPA > 0 ? statistics.totalGPA.toFixed(2) : "-"}
+                  {statistics.totalGPA > 0 ? roundUp(statistics.totalGPA) : "-"}
                 </p>
               </div>
               <div>
