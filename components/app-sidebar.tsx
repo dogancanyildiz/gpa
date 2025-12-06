@@ -36,22 +36,22 @@ const data = {
     },
     {
       title: "Dersler",
-      url: "#",
+      url: "/courses",
       icon: IconBook,
     },
     {
       title: "Notlar",
-      url: "#",
+      url: "/grades",
       icon: IconFileText,
     },
     {
       title: "İstatistikler",
-      url: "#",
+      url: "/statistics",
       icon: IconChartBar,
     },
     {
       title: "Raporlar",
-      url: "#",
+      url: "/reports",
       icon: IconReport,
     },
   ],
