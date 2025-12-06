@@ -85,8 +85,12 @@ export function GradeDistributionChart({ data }: GradeDistributionChartProps) {
             }}
           />
           <Legend
-            formatter={(value, entry: { payload: GradeDistributionData }) => {
-              return `${value} (${entry.payload.value})`
+            formatter={(value, entry) => {
+              if (entry?.payload) {
+                const payload = entry.payload as GradeDistributionData
+                return `${value} (${payload.value})`
+              }
+              return value
             }}
           />
         </PieChart>
