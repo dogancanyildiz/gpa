@@ -62,12 +62,18 @@ export const GRADE_SCALE = [
 export type GradeInfo = typeof GRADE_SCALE[number]
 
 // Calculate total score and letter grade
-export function calculateGrade(midterm: number = 0, quiz: number = 0, final: number = 0) {
+export function calculateGrade(
+  midterm: number | undefined = 0,
+  quiz: number | undefined = 0,
+  final: number | undefined = 0
+) {
   // Ortalama hesaplama (vize 37.5%, kısa sınav 12.5%)
-  const average = midterm * 0.375 + quiz * 0.125
+  const midtermValue = midterm ?? 0
+  const quizValue = quiz ?? 0
+  const average = midtermValue * 0.375 + quizValue * 0.125
   
-  // Final girildiyse toplam not hesaplama
-  const totalScore = final > 0 ? average + final * 0.5 : null
+  // Final girildiyse toplam not hesaplama (final !== undefined kontrolü ile 0 değerini de kabul eder)
+  const totalScore = final !== undefined ? average + final * 0.5 : null
   
   // Harf notu hesaplama
   const letterGrade = totalScore !== null ? getGradeLetter(totalScore) : null
