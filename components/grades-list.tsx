@@ -124,13 +124,15 @@ export function GradesList() {
   }
 
   const handleSubmit = (data: { courseId: string; midterm?: number; quiz?: number; final?: number }) => {
-    if (editingGrade) {
-      updateGrade(editingGrade.id, data)
+    const success = editingGrade
+      ? updateGrade(editingGrade.id, data)
+      : addGrade(data)
+    
+    if (success) {
       setEditingGrade(null)
-    } else {
-      addGrade(data)
+      setIsDialogOpen(false)
     }
-    setIsDialogOpen(false)
+    // If submission fails, dialog stays open and error toast is shown by the hook
   }
 
   const handleEdit = (grade: Grade) => {

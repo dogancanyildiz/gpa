@@ -55,13 +55,15 @@ export function CoursesList() {
   const [creditFilter, setCreditFilter] = useState<string>("all")
 
   const handleSubmit = (data: CourseFormData) => {
-    if (editingCourse) {
-      updateCourse(editingCourse.id, data)
+    const success = editingCourse
+      ? updateCourse(editingCourse.id, data)
+      : addCourse(data)
+    
+    if (success) {
       setEditingCourse(null)
-    } else {
-      addCourse(data)
+      setIsDialogOpen(false)
     }
-    setIsDialogOpen(false)
+    // If submission fails, dialog stays open and error toast is shown by the hook
   }
 
   const handleEdit = (course: Course) => {
