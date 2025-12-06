@@ -352,6 +352,33 @@ Yeni özellik önermek için:
 - [Supabase Docs](https://supabase.com/docs)
 - [shadcn/ui](https://ui.shadcn.com)
 - [GitHub Actions Docs](https://docs.github.com/en/actions)
+- [Vitest Docs](https://vitest.dev/)
+- [React Testing Library](https://testing-library.com/react)
+- [Zod Docs](https://zod.dev/)
+
+## 🔧 Geliştirme Notları
+
+### LocalStorage Kullanımı
+
+Proje şu anda LocalStorage kullanarak verileri saklar. Backend entegrasyonu için:
+
+- Supabase client'ları hazır (`lib/supabase/`)
+- Veri şemaları Zod ile tanımlı
+- Migration stratejisi mevcut (semester field örneği)
+
+### Static Export
+
+GitHub Pages deployment için:
+
+- API routes static export ile uyumlu değil
+- Build sırasında API routes geçici olarak taşınır
+- `GITHUB_PAGES=true` environment variable kullanılır
+
+### Test Stratejisi
+
+- Unit testler: `lib/__tests__/` klasöründe
+- Validation logic testleri mevcut
+- Component testleri için React Testing Library kullanılabilir
 
 Teşekkürler! 🎉
 
