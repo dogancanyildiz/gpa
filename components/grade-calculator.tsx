@@ -26,12 +26,26 @@ const GRADE_SCALE: GradeInfo[] = [
 ]
 
 function getGradeLetter(score: number): GradeInfo | null {
+  // Negatif değerler için en düşük notu döndür
+  if (score < 0) {
+    return GRADE_SCALE[GRADE_SCALE.length - 1] // FF
+  }
+  
+  // 100'den büyük değerler için en yüksek notu döndür
+  if (score > 100) {
+    return GRADE_SCALE[0] // AA
+  }
+  
+  // Normal aralık kontrolü
   for (const grade of GRADE_SCALE) {
     if (score >= grade.min && score <= grade.max) {
       return grade
     }
   }
-  return null
+  
+  // Eğer hiçbir aralığa uymuyorsa (olması gerekmez ama güvenlik için)
+  // En düşük notu döndür
+  return GRADE_SCALE[GRADE_SCALE.length - 1] // FF
 }
 
 function calculateFinalNeeded(
@@ -152,23 +166,29 @@ export function GradeCalculator() {
             </p>
           </div>
 
-          {totalScore !== null && currentGrade && (
+          {totalScore !== null && (
             <div className="rounded-lg border-2 border-primary bg-primary/5 p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Toplam Not:</span>
                 <span className="text-2xl font-bold">{totalScore.toFixed(2)}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Harf Notu:</span>
-                <div className="flex items-center gap-2">
-                  <Badge variant="default" className="text-lg px-3 py-1">
-                    {currentGrade.letter}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    (Katsayı: {currentGrade.coefficient.toFixed(2)})
-                  </span>
+              {currentGrade ? (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Harf Notu:</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="default" className="text-lg px-3 py-1">
+                      {currentGrade.letter}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                      (Katsayı: {currentGrade.coefficient.toFixed(2)})
+                    </span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="mt-2 text-sm text-muted-foreground">
+                  Harf notu hesaplanamadı
+                </div>
+              )}
             </div>
           )}
 
