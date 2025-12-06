@@ -16,6 +16,7 @@ describe("Validation", () => {
         name: "Veri Yapıları",
         code: "CSE201",
         credit: 3,
+        semester: "2024-2025 Güz",
       })
       expect(result.success).toBe(true)
       expect(result.data).toBeDefined()
@@ -25,6 +26,7 @@ describe("Validation", () => {
       const result = validateCourseForm({
         name: "",
         credit: 3,
+        semester: "2024-2025 Güz",
       })
       expect(result.success).toBe(false)
     })
@@ -33,6 +35,7 @@ describe("Validation", () => {
       const result = validateCourseForm({
         name: "Test Course",
         credit: 15,
+        semester: "2024-2025 Güz",
       })
       expect(result.success).toBe(false)
     })
@@ -64,12 +67,14 @@ describe("Validation", () => {
         id: "1",
         name: "Course 1",
         credit: 3,
+        semester: "2024-2025 Güz",
         createdAt: new Date().toISOString(),
       },
       {
         id: "2",
         name: "Course 2",
         credit: 4,
+        semester: "2024-2025 Bahar",
         createdAt: new Date().toISOString(),
       },
     ]
@@ -94,6 +99,7 @@ describe("Validation", () => {
         name: "Existing Course",
         code: "EXIST",
         credit: 3,
+        semester: "2024-2025 Güz",
         createdAt: new Date().toISOString(),
       },
     ]
@@ -104,6 +110,7 @@ describe("Validation", () => {
           name: "New Course",
           code: "NEW",
           credit: 3,
+          semester: "2024-2025 Bahar",
         },
         courses
       )
@@ -117,6 +124,7 @@ describe("Validation", () => {
           name: "Existing Course",
           code: "NEW",
           credit: 3,
+          semester: "2024-2025 Güz",
         },
         courses
       )
