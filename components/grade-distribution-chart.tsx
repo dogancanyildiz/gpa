@@ -4,8 +4,6 @@ import { Pie, PieChart, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 import {
   ChartConfig,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart"
 import { GRADE_SCALE } from "@/types/grade"
 
@@ -40,7 +38,7 @@ export function GradeDistributionChart({ data }: GradeDistributionChartProps) {
   }
 
   // Custom label function
-  const renderLabel = (entry: any) => {
+  const renderLabel = (entry: GradeDistributionData) => {
     return `${entry.name}: ${entry.value}`
   }
 
@@ -87,7 +85,7 @@ export function GradeDistributionChart({ data }: GradeDistributionChartProps) {
             }}
           />
           <Legend
-            formatter={(value, entry: any) => {
+            formatter={(value, entry: { payload: GradeDistributionData }) => {
               return `${value} (${entry.payload.value})`
             }}
           />

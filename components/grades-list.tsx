@@ -35,7 +35,6 @@ import { useGrades } from "@/hooks/use-grades"
 import { useCourses } from "@/hooks/use-courses"
 import { GradeForm } from "@/components/grade-form"
 import type { Grade } from "@/types/grade"
-import type { Course } from "@/types/course"
 import { GRADE_SCALE } from "@/types/grade"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 

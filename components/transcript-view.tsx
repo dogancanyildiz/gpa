@@ -13,24 +13,6 @@ interface TranscriptViewProps {
 }
 
 export function TranscriptView({ courses, grades }: TranscriptViewProps) {
-  // Get course name by ID
-  const getCourseName = (courseId: string) => {
-    const course = courses.find((c) => c.id === courseId)
-    return course?.name || "Bilinmeyen Ders"
-  }
-
-  // Get course code by ID
-  const getCourseCode = (courseId: string) => {
-    const course = courses.find((c) => c.id === courseId)
-    return course?.code || ""
-  }
-
-  // Get course credit by ID
-  const getCourseCredit = (courseId: string) => {
-    const course = courses.find((c) => c.id === courseId)
-    return course?.credit || 0
-  }
-
   // Calculate GPA for a grade
   const getGradeGPA = (letterGrade?: string) => {
     if (!letterGrade) return 0

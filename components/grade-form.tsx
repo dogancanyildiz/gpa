@@ -22,9 +22,8 @@ import {
 } from "@/components/ui/select"
 import { gradeFormSchema, type GradeFormData, type Grade, calculateGrade } from "@/types/grade"
 import type { Course } from "@/types/course"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { useEffect } from "react"
 
 interface GradeFormProps {
   grade?: Grade
@@ -44,8 +43,11 @@ export function GradeForm({ grade, courses, onSubmit, onCancel }: GradeFormProps
     },
   })
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const midterm = form.watch("midterm") || 0
+  // eslint-disable-next-line react-hooks/incompatible-library
   const quiz = form.watch("quiz") || 0
+  // eslint-disable-next-line react-hooks/incompatible-library
   const final = form.watch("final") || 0
 
   // Calculate grade in real-time

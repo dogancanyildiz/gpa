@@ -6,7 +6,6 @@ import { useStatistics } from "@/hooks/use-statistics"
 import { GradeDistributionChart } from "@/components/grade-distribution-chart"
 import { CoursePerformanceChart } from "@/components/course-performance-chart"
 import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
 
 export function StatisticsOverview() {
   const { statistics, gradeDistributionData, coursePerformanceData } = useStatistics()
@@ -17,13 +16,6 @@ export function StatisticsOverview() {
     if (gpa >= 2.5) return "text-yellow-600 dark:text-yellow-400"
     if (gpa >= 2.0) return "text-orange-600 dark:text-orange-400"
     return "text-red-600 dark:text-red-400"
-  }
-
-  const getGPABadge = (gpa: number) => {
-    if (gpa >= 3.5) return "default"
-    if (gpa >= 3.0) return "secondary"
-    if (gpa >= 2.5) return "outline"
-    return "destructive"
   }
 
   return (
