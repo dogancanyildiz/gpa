@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { IconPlus, IconBook, IconEdit, IconTrash } from "@tabler/icons-react"
+import { useState, useMemo } from "react"
+import { IconPlus, IconBook, IconEdit, IconTrash, IconSearch, IconX } from "@tabler/icons-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -27,12 +27,32 @@ import { CourseForm } from "@/components/course-form"
 import type { Course, CourseFormData } from "@/types/course"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+import { usePagination } from "@/hooks/use-pagination"
 
 export function CoursesList() {
   const { courses, isLoading, addCourse, updateCourse, deleteCourse } = useCourses()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingCourse, setEditingCourse] = useState<Course | null>(null)
   const [deletingCourse, setDeletingCourse] = useState<Course | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [creditFilter, setCreditFilter] = useState<string>("all")
 
   const handleSubmit = (data: CourseFormData) => {
     if (editingCourse) {
@@ -64,6 +84,47 @@ export function CoursesList() {
     setEditingCourse(null)
     setIsDialogOpen(true)
   }
+
+  // Filter courses
+  const filteredCourses = useMemo(() => {
+    let filtered = courses
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim()
+      filtered = filtered.filter(
+        (course) =>
+          course.name.toLowerCase().includes(query) ||
+          course.code?.toLowerCase().includes(query)
+      )
+    }
+
+    // Credit filter
+    if (creditFilter !== "all") {
+      const credit = parseInt(creditFilter)
+      filtered = filtered.filter((course) => course.credit === credit)
+    }
+
+    return filtered
+  }, [courses, searchQuery, creditFilter])
+
+  // Pagination
+  const {
+    currentPage,
+    totalPages,
+    paginatedData: paginatedCourses,
+    goToPage,
+    nextPage,
+    previousPage,
+    hasNextPage,
+    hasPreviousPage,
+    startIndex,
+    endIndex,
+    totalItems,
+  } = usePagination({
+    data: filteredCourses,
+    itemsPerPage: 12,
+  })
 
   return (
     <div className="space-y-6">
@@ -101,6 +162,49 @@ export function CoursesList() {
         </Dialog>
       </div>
 
+      {/* Search and Filter */}
+      {!isLoading && courses.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Ders adı veya kodu ile ara..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-9"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <IconX className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <Select value={creditFilter} onValueChange={setCreditFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="AKTS Filtrele" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tüm AKTS</SelectItem>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((credit) => (
+                <SelectItem key={credit} value={credit.toString()}>
+                  {credit} AKTS
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Results count */}
+      {!isLoading && courses.length > 0 && (searchQuery || creditFilter !== "all") && (
+        <div className="text-sm text-muted-foreground">
+          {filteredCourses.length} ders bulundu
+        </div>
+      )}
+
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
@@ -130,8 +234,9 @@ export function CoursesList() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => (
+        <>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {paginatedCourses.map((course) => (
             <Card key={course.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -169,7 +274,59 @@ export function CoursesList() {
               </CardContent>
             </Card>
           ))}
-        </div>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                {startIndex + 1}-{endIndex} / {totalItems} ders
+              </div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={previousPage}
+                      className={!hasPreviousPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => goToPage(page)}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )
+                    } else if (page === currentPage - 2 || page === currentPage + 2) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      )
+                    }
+                    return null
+                  })}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={nextPage}
+                      className={!hasNextPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </>
       )}
 
       <AlertDialog

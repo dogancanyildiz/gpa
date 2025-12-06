@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { IconPlus, IconFileText, IconEdit, IconTrash, IconCalculator } from "@tabler/icons-react"
+import { useState, useCallback } from "react"
+import { IconPlus, IconFileText, IconEdit, IconTrash, IconCalculator, IconSearch, IconX } from "@tabler/icons-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -37,6 +37,17 @@ import { GradeForm } from "@/components/grade-form"
 import type { Grade } from "@/types/grade"
 import { GRADE_SCALE } from "@/types/grade"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Input } from "@/components/ui/input"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+import { usePagination } from "@/hooks/use-pagination"
 
 export function GradesList() {
   const { grades, isLoading: gradesLoading, addGrade, updateGrade, deleteGrade } = useGrades()
@@ -45,20 +56,56 @@ export function GradesList() {
   const [editingGrade, setEditingGrade] = useState<Grade | null>(null)
   const [deletingGrade, setDeletingGrade] = useState<Grade | null>(null)
   const [selectedCourseId, setSelectedCourseId] = useState<string>("all")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [gradeFilter, setGradeFilter] = useState<string>("all")
 
   const isLoading = gradesLoading || coursesLoading
 
-  // Filter grades by selected course
-  const filteredGrades = useMemo(() => {
-    if (selectedCourseId === "all") return grades
-    return grades.filter((grade) => grade.courseId === selectedCourseId)
-  }, [grades, selectedCourseId])
+  // Filter grades by selected course, search, and grade
+  let filteredGrades = grades
+
+  // Course filter
+  if (selectedCourseId !== "all") {
+    filteredGrades = filteredGrades.filter((grade) => grade.courseId === selectedCourseId)
+  }
+
+  // Search filter
+  if (searchQuery.trim()) {
+    const query = searchQuery.toLowerCase().trim()
+    filteredGrades = filteredGrades.filter((grade) => {
+      const courseName = getCourseName(grade.courseId).toLowerCase()
+      return courseName.includes(query)
+    })
+  }
+
+  // Grade filter
+  if (gradeFilter !== "all") {
+    filteredGrades = filteredGrades.filter((grade) => grade.letterGrade === gradeFilter)
+  }
+
+  // Pagination
+  const {
+    currentPage,
+    totalPages,
+    paginatedData: paginatedGrades,
+    goToPage,
+    nextPage,
+    previousPage,
+    hasNextPage,
+    hasPreviousPage,
+    startIndex,
+    endIndex,
+    totalItems,
+  } = usePagination({
+    data: filteredGrades,
+    itemsPerPage: 10,
+  })
 
   // Get course name by ID
-  const getCourseName = (courseId: string) => {
+  const getCourseName = useCallback((courseId: string) => {
     const course = courses.find((c) => c.id === courseId)
     return course?.name || "Bilinmeyen Ders"
-  }
+  }, [courses])
 
   // Get grade badge color
   const getGradeBadgeVariant = (letterGrade?: string) => {
@@ -158,6 +205,49 @@ export function GradesList() {
         </div>
       </div>
 
+      {/* Search and Filter */}
+      {courses.length > 0 && !isLoading && (
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Ders adı ile ara..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-9"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <IconX className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <Select value={gradeFilter} onValueChange={setGradeFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Harf Notu Filtrele" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tüm Notlar</SelectItem>
+              {GRADE_SCALE.map((grade) => (
+                <SelectItem key={grade.letter} value={grade.letter}>
+                  {grade.letter}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Results count */}
+      {courses.length > 0 && !isLoading && (searchQuery || gradeFilter !== "all" || selectedCourseId !== "all") && (
+        <div className="text-sm text-muted-foreground">
+          {filteredGrades.length} not bulundu
+        </div>
+      )}
+
       {courses.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
@@ -224,7 +314,7 @@ export function GradesList() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredGrades.map((grade) => (
+                {paginatedGrades.map((grade) => (
                   <TableRow key={grade.id}>
                     <TableCell className="font-medium">
                       {getCourseName(grade.courseId)}
@@ -280,6 +370,56 @@ export function GradesList() {
               </TableBody>
             </Table>
           </CardContent>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-6 pb-6">
+              <div className="text-sm text-muted-foreground">
+                {startIndex + 1}-{endIndex} / {totalItems} not
+              </div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={previousPage}
+                      className={!hasPreviousPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => goToPage(page)}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )
+                    } else if (page === currentPage - 2 || page === currentPage + 2) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      )
+                    }
+                    return null
+                  })}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={nextPage}
+                      className={!hasNextPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </Card>
       )}
 
