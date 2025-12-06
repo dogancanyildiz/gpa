@@ -7,11 +7,15 @@ import { useCourses } from "@/hooks/use-courses"
 import { useGrades } from "@/hooks/use-grades"
 import { useStatistics } from "@/hooks/use-statistics"
 import { TranscriptView } from "@/components/transcript-view"
+import { Skeleton } from "@/components/ui/skeleton"
+import { SkeletonTable } from "@/components/skeleton-table"
 
 export function ReportsOverview() {
-  const { courses } = useCourses()
-  const { grades } = useGrades()
+  const { courses, isLoading: coursesLoading } = useCourses()
+  const { grades, isLoading: gradesLoading } = useGrades()
   const { statistics } = useStatistics()
+  
+  const isLoading = coursesLoading || gradesLoading
 
   const handlePrint = () => {
     window.print()
@@ -40,26 +44,37 @@ export function ReportsOverview() {
           <CardTitle>Özet Bilgiler</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Genel GPA</p>
-              <p className="text-2xl font-bold">
-                {statistics.totalGPA > 0 ? statistics.totalGPA.toFixed(2) : "-"}
-              </p>
+          {isLoading ? (
+            <div className="grid gap-4 md:grid-cols-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i}>
+                  <Skeleton className="h-4 w-24 mb-2" />
+                  <Skeleton className="h-8 w-16" />
+                </div>
+              ))}
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Toplam AKTS</p>
-              <p className="text-2xl font-bold">{statistics.totalCredits}</p>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Genel GPA</p>
+                <p className="text-2xl font-bold">
+                  {statistics.totalGPA > 0 ? statistics.totalGPA.toFixed(2) : "-"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Toplam AKTS</p>
+                <p className="text-2xl font-bold">{statistics.totalCredits}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Tamamlanan AKTS</p>
+                <p className="text-2xl font-bold">{statistics.completedCredits}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Ders Sayısı</p>
+                <p className="text-2xl font-bold">{statistics.courseCount}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Tamamlanan AKTS</p>
-              <p className="text-2xl font-bold">{statistics.completedCredits}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Ders Sayısı</p>
-              <p className="text-2xl font-bold">{statistics.courseCount}</p>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
@@ -72,7 +87,11 @@ export function ReportsOverview() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <TranscriptView courses={courses} grades={grades} />
+          {isLoading ? (
+            <SkeletonTable rows={5} columns={9} />
+          ) : (
+            <TranscriptView courses={courses} grades={grades} />
+          )}
         </CardContent>
       </Card>
     </div>

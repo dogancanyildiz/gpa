@@ -6,9 +6,16 @@ import { useStatistics } from "@/hooks/use-statistics"
 import { GradeDistributionChart } from "@/components/grade-distribution-chart"
 import { CoursePerformanceChart } from "@/components/course-performance-chart"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useCourses } from "@/hooks/use-courses"
+import { useGrades } from "@/hooks/use-grades"
 
 export function StatisticsOverview() {
   const { statistics, gradeDistributionData, coursePerformanceData } = useStatistics()
+  const { isLoading: coursesLoading } = useCourses()
+  const { isLoading: gradesLoading } = useGrades()
+  
+  const isLoading = coursesLoading || gradesLoading
 
   const getGPAColor = (gpa: number) => {
     if (gpa >= 3.5) return "text-green-600 dark:text-green-400"
@@ -28,29 +35,45 @@ export function StatisticsOverview() {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Genel GPA</CardTitle>
-            <IconTrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {statistics.totalGPA > 0 ? (
-                <span className={getGPAColor(statistics.totalGPA)}>
-                  {statistics.totalGPA.toFixed(2)}
-                </span>
-              ) : (
-                <span className="text-muted-foreground">-</span>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {statistics.completedCredits > 0
-                ? `${statistics.completedCredits} AKTS tamamlandı`
-                : "Henüz not girilmemiş"}
-            </p>
-          </CardContent>
-        </Card>
+      {isLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Genel GPA</CardTitle>
+              <IconTrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {statistics.totalGPA > 0 ? (
+                  <span className={getGPAColor(statistics.totalGPA)}>
+                    {statistics.totalGPA.toFixed(2)}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {statistics.completedCredits > 0
+                  ? `${statistics.completedCredits} AKTS tamamlandı`
+                  : "Henüz not girilmemiş"}
+              </p>
+            </CardContent>
+          </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -94,10 +117,26 @@ export function StatisticsOverview() {
             </p>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      )}
 
       {/* Charts */}
-      <div className="grid gap-4 md:grid-cols-2">
+      {isLoading ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {[1, 2].map((i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-6 w-32 mb-2" />
+                <Skeleton className="h-4 w-48" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-[300px] w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
         {/* Grade Distribution Pie Chart */}
         <Card>
           <CardHeader>
@@ -141,10 +180,25 @@ export function StatisticsOverview() {
             )}
           </CardContent>
         </Card>
-      </div>
+        </div>
+      )}
 
       {/* Course Details Table */}
-      {statistics.courseStats.length > 0 && (
+      {isLoading ? (
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32 mb-2" />
+            <Skeleton className="h-4 w-48" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-20 w-full rounded-lg" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : statistics.courseStats.length > 0 ? (
         <Card>
           <CardHeader>
             <CardTitle>Ders Detayları</CardTitle>
@@ -195,7 +249,7 @@ export function StatisticsOverview() {
             </div>
           </CardContent>
         </Card>
-      )}
+      ) : null}
     </div>
   )
 }
