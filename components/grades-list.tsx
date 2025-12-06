@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { IconPlus, IconFileText, IconEdit, IconTrash, IconCalculator, IconSearch, IconX } from "@tabler/icons-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -61,27 +61,37 @@ export function GradesList() {
 
   const isLoading = gradesLoading || coursesLoading
 
+  // Get course name by ID (must be defined before filtering logic)
+  const getCourseName = useCallback((courseId: string) => {
+    const course = courses.find((c) => c.id === courseId)
+    return course?.name || "Bilinmeyen Ders"
+  }, [courses])
+
   // Filter grades by selected course, search, and grade
-  let filteredGrades = grades
+  const filteredGrades = useMemo(() => {
+    let filtered = grades
 
-  // Course filter
-  if (selectedCourseId !== "all") {
-    filteredGrades = filteredGrades.filter((grade) => grade.courseId === selectedCourseId)
-  }
+    // Course filter
+    if (selectedCourseId !== "all") {
+      filtered = filtered.filter((grade) => grade.courseId === selectedCourseId)
+    }
 
-  // Search filter
-  if (searchQuery.trim()) {
-    const query = searchQuery.toLowerCase().trim()
-    filteredGrades = filteredGrades.filter((grade) => {
-      const courseName = getCourseName(grade.courseId).toLowerCase()
-      return courseName.includes(query)
-    })
-  }
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim()
+      filtered = filtered.filter((grade) => {
+        const courseName = getCourseName(grade.courseId).toLowerCase()
+        return courseName.includes(query)
+      })
+    }
 
-  // Grade filter
-  if (gradeFilter !== "all") {
-    filteredGrades = filteredGrades.filter((grade) => grade.letterGrade === gradeFilter)
-  }
+    // Grade filter
+    if (gradeFilter !== "all") {
+      filtered = filtered.filter((grade) => grade.letterGrade === gradeFilter)
+    }
+
+    return filtered
+  }, [grades, selectedCourseId, searchQuery, gradeFilter, getCourseName])
 
   // Pagination
   const {
@@ -100,12 +110,6 @@ export function GradesList() {
     data: filteredGrades,
     itemsPerPage: 10,
   })
-
-  // Get course name by ID
-  const getCourseName = useCallback((courseId: string) => {
-    const course = courses.find((c) => c.id === courseId)
-    return course?.name || "Bilinmeyen Ders"
-  }, [courses])
 
   // Get grade badge color
   const getGradeBadgeVariant = (letterGrade?: string) => {
