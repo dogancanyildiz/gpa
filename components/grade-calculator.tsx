@@ -37,6 +37,7 @@ function getGradeLetter(score: number): GradeInfo | null {
   }
   
   // Normal aralık kontrolü
+  // Her aralık için: score >= min && score <= max
   for (const grade of GRADE_SCALE) {
     if (score >= grade.min && score <= grade.max) {
       return grade
@@ -80,15 +81,16 @@ export function GradeCalculator() {
   // Ortalama hesaplama (vize 37.5%, kısa sınav 12.5%)
   const average = midtermNum * 0.375 + quizNum * 0.125
 
-  // Final girildiyse toplam not hesaplama
-  const totalScore = finalNum > 0 
+  // Final girildiyse toplam not hesaplama (final !== undefined kontrolü ile 0 değerini de kabul eder)
+  const hasFinal = final !== "" && !isNaN(finalNum)
+  const totalScore = hasFinal 
     ? average + finalNum * 0.5 
     : null
 
   const currentGrade = totalScore !== null ? getGradeLetter(totalScore) : null
 
   // Final girilmediyse, her harf notu için gerekli final notunu hesapla
-  const finalNeededForGrades = finalNum === 0 && midtermNum > 0 && quizNum > 0
+  const finalNeededForGrades = !hasFinal && midtermNum > 0 && quizNum > 0
     ? GRADE_SCALE.map(grade => ({
         grade,
         finalNeeded: calculateFinalNeeded(midtermNum, quizNum, grade),
@@ -173,17 +175,17 @@ export function GradeCalculator() {
                 <span className="text-2xl font-bold">{totalScore.toFixed(2)}</span>
               </div>
               {currentGrade ? (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Harf Notu:</span>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="default" className="text-lg px-3 py-1">
-                      {currentGrade.letter}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      (Katsayı: {currentGrade.coefficient.toFixed(2)})
-                    </span>
-                  </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Harf Notu:</span>
+                <div className="flex items-center gap-2">
+                  <Badge variant="default" className="text-lg px-3 py-1">
+                    {currentGrade.letter}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">
+                    (Katsayı: {currentGrade.coefficient.toFixed(2)})
+                  </span>
                 </div>
+              </div>
               ) : (
                 <div className="mt-2 text-sm text-muted-foreground">
                   Harf notu hesaplanamadı
@@ -192,7 +194,7 @@ export function GradeCalculator() {
             </div>
           )}
 
-          {finalNum === 0 && midtermNum > 0 && quizNum > 0 && (
+          {!hasFinal && midtermNum > 0 && quizNum > 0 && (
             <div className="space-y-3">
               <h3 className="text-sm font-semibold">
                 Final Notuna Göre Alabileceğiniz Harf Notları:

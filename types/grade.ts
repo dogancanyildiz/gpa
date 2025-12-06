@@ -98,6 +98,7 @@ function getGradeLetter(score: number): GradeInfo | null {
   }
   
   // Normal aralık kontrolü
+  // Her aralık için: score >= min && score <= max
   for (const grade of GRADE_SCALE) {
     if (score >= grade.min && score <= grade.max) {
       return grade
