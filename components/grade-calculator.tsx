@@ -99,7 +99,7 @@ export function GradeCalculator() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Not Hesaplama Sistemi</CardTitle>
+          <CardTitle>Not Hesaplayıcı</CardTitle>
           <CardDescription>
             Vize ve kısa sınav notlarınızı girerek ortalamanızı hesaplayın ve 
             final notu ile hangi harf notunu alacağınızı görün.

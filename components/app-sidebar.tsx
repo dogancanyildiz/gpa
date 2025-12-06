@@ -6,10 +6,11 @@ import {
   IconChartBar,
   IconDashboard,
   IconFileText,
-  IconInnerShadowTop,
   IconReport,
   IconBrandLinkedin,
+  IconSchool,
 } from "@tabler/icons-react"
+import Link from "next/link"
 
 import { NavMain } from "@/components/nav-main"
 import {
@@ -30,7 +31,7 @@ const data = {
   },
   navMain: [
     {
-      title: "Dashboard",
+      title: "Ana Sayfa",
       url: "/dashboard",
       icon: IconDashboard,
     },
@@ -61,19 +62,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <a href="/dashboard">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">GPA</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="px-2 py-3">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group"
+          >
+            <div className="flex items-center justify-center rounded-md bg-primary text-primary-foreground size-10 shrink-0 group-hover:bg-primary/90 transition-colors">
+              <IconSchool className="size-5" />
+            </div>
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <span className="text-base font-semibold leading-none">GPA</span>
+              <span className="text-xs text-muted-foreground leading-none">Hesaplama Sistemi</span>
+            </div>
+          </Link>
+        </div>
+        <div className="h-px bg-sidebar-border mx-2" />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
