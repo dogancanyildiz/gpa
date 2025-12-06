@@ -30,11 +30,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAGES: "true"
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-      NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL || 'https://dogancanyildiz.github.io/gpa' }}
-      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
     
     steps:
       - name: Checkout
