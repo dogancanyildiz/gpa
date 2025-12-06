@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { courseFormSchema, type CourseFormData, type Course } from "@/types/course"
+import { useMemo } from "react"
 
 interface CourseFormProps {
   course?: Course
@@ -29,13 +30,44 @@ interface CourseFormProps {
   onCancel?: () => void
 }
 
+// Generate semester options (from 2020 to current year + 3 years)
+function generateSemesterOptions(): string[] {
+  const currentYear = new Date().getFullYear()
+  const startYear = 2020
+  const endYear = currentYear + 3
+  const options: string[] = []
+  
+  // Generate from 2020 Güz to endYear Bahar
+  for (let year = startYear; year <= endYear; year++) {
+    options.push(`${year}-${year + 1} Güz`)
+    options.push(`${year}-${year + 1} Bahar`)
+  }
+  
+  return options
+}
+
 export function CourseForm({ course, onSubmit, onCancel }: CourseFormProps) {
+  const semesterOptions = useMemo(() => generateSemesterOptions(), [])
+  
+  // Get default semester (current semester)
+  const getDefaultSemester = () => {
+    if (course?.semester) return course.semester
+    const currentYear = new Date().getFullYear()
+    const month = new Date().getMonth() + 1 // 1-12
+    // Güz: Eylül (9), Ekim (10), Kasım (11), Aralık (12), Ocak (1)
+    // Bahar: Şubat (2), Mart (3), Nisan (4), Mayıs (5), Haziran (6), Temmuz (7), Ağustos (8)
+    const semester = month >= 9 || month <= 1 ? "Güz" : "Bahar"
+    const year = month >= 9 ? currentYear : currentYear - 1
+    return `${year}-${year + 1} ${semester}`
+  }
+
   const form = useForm<CourseFormData>({
     resolver: zodResolver(courseFormSchema),
     defaultValues: {
       name: course?.name || "",
       code: course?.code || "",
       credit: course?.credit || 3,
+      semester: course?.semester || getDefaultSemester(),
     },
   })
 
@@ -110,6 +142,7 @@ export function CourseForm({ course, onSubmit, onCancel }: CourseFormProps) {
               <Select
                 onValueChange={(value) => field.onChange(Number(value))}
                 defaultValue={field.value?.toString()}
+                disabled={form.formState.isSubmitting}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -126,6 +159,38 @@ export function CourseForm({ course, onSubmit, onCancel }: CourseFormProps) {
               </Select>
               <FormDescription>
                 Dersin AKTS (Avrupa Kredi Transfer Sistemi) değeri
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="semester"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Dönem *</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={form.formState.isSubmitting}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Dönem seçin" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {semesterOptions.map((semester) => (
+                    <SelectItem key={semester} value={semester}>
+                      {semester}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Dersin hangi döneme ait olduğunu seçin
               </FormDescription>
               <FormMessage />
             </FormItem>

@@ -6,6 +6,7 @@ export const courseSchema = z.object({
   name: z.string().min(1, "Ders adı gereklidir").max(100, "Ders adı çok uzun"),
   code: z.string().max(20, "Ders kodu çok uzun").optional(),
   credit: z.number().min(0).max(10).default(3),
+  semester: z.string().min(1, "Dönem gereklidir").max(50, "Dönem çok uzun"),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime().optional(),
 })
@@ -44,6 +45,11 @@ export const courseFormSchema = z.object({
     .min(0, "AKTS değeri 0'dan küçük olamaz")
     .max(10, "AKTS değeri 10'dan büyük olamaz")
     .int("AKTS değeri tam sayı olmalıdır"),
+  semester: z
+    .string()
+    .min(1, "Dönem gereklidir")
+    .max(50, "Dönem en fazla 50 karakter olabilir")
+    .trim(),
 })
 
 export type CourseFormData = z.infer<typeof courseFormSchema>

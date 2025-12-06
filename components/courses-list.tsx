@@ -95,7 +95,8 @@ export function CoursesList() {
       filtered = filtered.filter(
         (course) =>
           course.name.toLowerCase().includes(query) ||
-          course.code?.toLowerCase().includes(query)
+          course.code?.toLowerCase().includes(query) ||
+          course.semester?.toLowerCase().includes(query)
       )
     }
 
@@ -107,6 +108,46 @@ export function CoursesList() {
 
     return filtered
   }, [courses, searchQuery, creditFilter])
+
+  // Group courses by semester
+  const coursesBySemester = useMemo(() => {
+    const grouped = new Map<string, typeof filteredCourses>()
+    
+    filteredCourses.forEach((course) => {
+      const semester = course.semester || "Belirtilmemiş"
+      if (!grouped.has(semester)) {
+        grouped.set(semester, [])
+      }
+      grouped.get(semester)!.push(course)
+    })
+
+    // Sort semesters (newest first)
+    const sortedSemesters = Array.from(grouped.keys()).sort((a, b) => {
+      // Extract year from semester string (e.g., "2024-2025 Güz" -> 2024)
+      const getYear = (sem: string) => {
+        const match = sem.match(/^(\d{4})/)
+        return match ? parseInt(match[1]) : 0
+      }
+      const yearA = getYear(a)
+      const yearB = getYear(b)
+      if (yearA !== yearB) return yearB - yearA // Newer years first
+      
+      // If same year, Güz comes before Bahar
+      if (a.includes("Güz") && b.includes("Bahar")) return -1
+      if (a.includes("Bahar") && b.includes("Güz")) return 1
+      return a.localeCompare(b)
+    })
+
+    return sortedSemesters.map((semester) => ({
+      semester,
+      courses: grouped.get(semester)!,
+    }))
+  }, [filteredCourses])
+
+  // Flatten grouped courses for pagination
+  const allCoursesForPagination = useMemo(() => {
+    return coursesBySemester.flatMap((group) => group.courses)
+  }, [coursesBySemester])
 
   // Pagination
   const {
@@ -122,9 +163,20 @@ export function CoursesList() {
     endIndex,
     totalItems,
   } = usePagination({
-    data: filteredCourses,
+    data: allCoursesForPagination,
     itemsPerPage: 12,
   })
+
+  // Get courses for current page grouped by semester
+  const paginatedCoursesBySemester = useMemo(() => {
+    const paginatedSet = new Set(paginatedCourses.map((c) => c.id))
+    return coursesBySemester
+      .map((group) => ({
+        semester: group.semester,
+        courses: group.courses.filter((c) => paginatedSet.has(c.id)),
+      }))
+      .filter((group) => group.courses.length > 0)
+  }, [coursesBySemester, paginatedCourses])
 
   return (
     <div className="space-y-6">
@@ -201,7 +253,7 @@ export function CoursesList() {
       {/* Results count */}
       {!isLoading && courses.length > 0 && (searchQuery || creditFilter !== "all") && (
         <div className="text-sm text-muted-foreground">
-          {filteredCourses.length} ders bulundu
+          {filteredCourses.length} ders bulundu ({coursesBySemester.length} dönem)
         </div>
       )}
 
@@ -235,45 +287,62 @@ export function CoursesList() {
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {paginatedCourses.map((course) => (
-            <Card key={course.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-xl">{course.name}</CardTitle>
-                    {course.code && (
-                      <CardDescription className="mt-1">
-                        {course.code}
-                      </CardDescription>
-                    )}
-                  </div>
-                  <Badge variant="secondary" className="ml-2">
-                    {course.credit} AKTS
+          <div className="space-y-6">
+            {paginatedCoursesBySemester.map(({ semester, courses: semesterCourses }) => (
+              <div key={semester} className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-xl font-semibold">{semester}</h2>
+                  <Badge variant="outline" className="text-sm">
+                    {semesterCourses.length} ders
                   </Badge>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(course)}
-                  >
-                    <IconEdit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(course)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <IconTrash className="h-4 w-4" />
-                  </Button>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {semesterCourses.map((course) => (
+                    <Card key={course.id} className="hover:shadow-md transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-xl">{course.name}</CardTitle>
+                            <div className="flex items-center gap-2 mt-1">
+                              {course.code && (
+                                <CardDescription>
+                                  {course.code}
+                                </CardDescription>
+                              )}
+                              <Badge variant="outline" className="text-xs">
+                                {course.semester}
+                              </Badge>
+                            </div>
+                          </div>
+                          <Badge variant="secondary" className="ml-2">
+                            {course.credit} AKTS
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(course)}
+                          >
+                            <IconEdit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(course)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <IconTrash className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            ))}
           </div>
 
           {/* Pagination */}

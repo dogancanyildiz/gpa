@@ -33,14 +33,41 @@ export function useCourses() {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
         const parsed = JSON.parse(stored) as Course[]
+        
+        // Migration: Add default semester to old courses that don't have it
+        const migrated = parsed.map((course) => {
+          if (!course.semester) {
+            // Default to current semester
+            const currentYear = new Date().getFullYear()
+            const month = new Date().getMonth() + 1
+            const semester = month >= 9 || month <= 1 ? "Güz" : "Bahar"
+            const year = month >= 9 ? currentYear : currentYear - 1
+            return {
+              ...course,
+              semester: `${year}-${year + 1} ${semester}`,
+            }
+          }
+          return course
+        })
+        
         // Validate with Zod
-        const validated = parsed.filter((course) => {
+        const validated = migrated.filter((course) => {
           const result = courseSchema.safeParse(course)
           if (!result.success) {
             console.warn("Invalid course data:", course, result.error)
           }
           return result.success
         })
+        
+        // Save migrated data if migration occurred
+        if (migrated.length > 0 && migrated.some((c) => !parsed.find((p) => p.id === c.id && p.semester === c.semester))) {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(validated))
+          } catch (saveError) {
+            console.warn("Failed to save migrated courses:", saveError)
+          }
+        }
+        
         setCourses(validated)
       }
     } catch (error) {
