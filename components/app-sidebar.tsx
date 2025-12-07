@@ -42,7 +42,7 @@ const data = {
       url: "/grades",
       icon: IconFileText,
     },
-    {
+        {
       title: "İstatistikler",
       url: "/statistics",
       icon: IconChartBar,
