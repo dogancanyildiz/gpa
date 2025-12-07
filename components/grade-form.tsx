@@ -218,7 +218,7 @@ export function GradeForm({ grade, courses, onSubmit, onCancel }: GradeFormProps
                   <div>
                     <p className="text-sm text-muted-foreground">Ara Sınav Ortalaması</p>
                     <p className="text-lg font-semibold">
-                      {((midterm ?? 0) * 0.375 + (quiz ?? 0) * 0.125).toFixed(2)} / 50
+                      {calculation.roundedAverage} / 50
                     </p>
                   </div>
                   <div className="text-right">

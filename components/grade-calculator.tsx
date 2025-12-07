@@ -57,12 +57,14 @@ function calculateFinalNeeded(
 ): number | null {
   // Ortalama = (vize * 0.375) + (kısa sınav * 0.125)
   const average = midterm * 0.375 + quiz * 0.125
+  // Yuvarlanmış ortalama kullanılmalı (gösterimle tutarlılık için)
+  const roundedAverage = Math.ceil(average)
   
-  // Hedef not = ortalama + (final * 0.50)
-  // targetGrade.min = average + (final * 0.50)
-  // final = (targetGrade.min - average) / 0.50
+  // Hedef not = yuvarlanmış ortalama + (final * 0.50)
+  // targetGrade.min = roundedAverage + (final * 0.50)
+  // final = (targetGrade.min - roundedAverage) / 0.50
   
-  const finalNeeded = (targetGrade.min - average) / 0.5
+  const finalNeeded = (targetGrade.min - roundedAverage) / 0.5
   
   if (finalNeeded < 0) return 0
   if (finalNeeded > 100) return null
@@ -81,11 +83,14 @@ export function GradeCalculator() {
 
   // Ortalama hesaplama (vize 37.5%, kısa sınav 12.5%)
   const average = midtermNum * 0.375 + quizNum * 0.125
+  // Yuvarlanmış ortalama (gösterim için)
+  const roundedAverage = Math.ceil(average)
 
   // Final girildiyse toplam not hesaplama (final !== undefined kontrolü ile 0 değerini de kabul eder)
+  // Yuvarlanmış ortalama kullanılmalı (gösterimle tutarlılık için)
   const hasFinal = final !== "" && !isNaN(finalNum)
   const totalScore = hasFinal 
-    ? average + finalNum * 0.5 
+    ? roundedAverage + finalNum * 0.5 
     : null
 
   // Harf notu hesaplama - yuvarlanmış değer üzerinden yapılır
@@ -146,11 +151,11 @@ export function GradeCalculator() {
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Ara Sınav Ortalaması:</span>
                 <span className="text-lg font-bold">
-                  {average.toFixed(2)} / 50
+                  {roundedAverage} / 50
                 </span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                (Vize: {midtermNum} × 37.5% + Kısa Sınav: {quizNum} × 12.5%)
+                (Vize: {midtermNum} × 37.5% + Kısa Sınav: {quizNum} × 12.5% = {average.toFixed(2)} → {roundedAverage})
               </p>
             </div>
           )}
