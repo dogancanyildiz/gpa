@@ -80,9 +80,12 @@ export function calculateGrade(
   const midtermValue = midterm ?? 0
   const quizValue = quiz ?? 0
   const average = midtermValue * 0.375 + quizValue * 0.125
+  // Yuvarlanmış ortalama (gösterimle tutarlılık için)
+  const roundedAverage = roundUpToInteger(average)
   
   // Final girildiyse toplam not hesaplama (final !== undefined kontrolü ile 0 değerini de kabul eder)
-  const totalScore = final !== undefined ? average + final * 0.5 : null
+  // Yuvarlanmış ortalama kullanılmalı (gösterimle tutarlılık için)
+  const totalScore = final !== undefined ? roundedAverage + final * 0.5 : null
   
   // Harf notu hesaplama - yuvarlanmış değer üzerinden yapılır
   // Böylece gösterilen not ile harf notu eşleşir (örn: 89.375 → 90 → AA)
@@ -93,6 +96,7 @@ export function calculateGrade(
     totalScore,
     letterGrade: letterGrade?.letter,
     coefficient: letterGrade?.coefficient,
+    roundedAverage, // Yuvarlanmış ortalama da döndürülüyor (gösterim için)
   }
 }
 
