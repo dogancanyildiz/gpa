@@ -57,14 +57,12 @@ function calculateFinalNeeded(
 ): number | null {
   // Ortalama = (vize * 0.375) + (kısa sınav * 0.125)
   const average = midterm * 0.375 + quiz * 0.125
-  // Yuvarlanmış ortalama kullanılmalı (gösterimle tutarlılık için)
-  const roundedAverage = Math.ceil(average)
   
-  // Hedef not = yuvarlanmış ortalama + (final * 0.50)
-  // targetGrade.min = roundedAverage + (final * 0.50)
-  // final = (targetGrade.min - roundedAverage) / 0.50
-  
-  const finalNeeded = (targetGrade.min - roundedAverage) / 0.5
+  // Hedef not = ortalama + (final * 0.50)
+  // targetGrade.min = average + (final * 0.50)
+  // final = (targetGrade.min - average) / 0.50
+  // Tam ortalama kullanılmalı (yuvarlama sadece gösterim için yapılır, hesaplamalar için değil)
+  const finalNeeded = (targetGrade.min - average) / 0.5
   
   if (finalNeeded < 0) return 0
   if (finalNeeded > 100) return null
@@ -83,14 +81,14 @@ export function GradeCalculator() {
 
   // Ortalama hesaplama (vize 37.5%, kısa sınav 12.5%)
   const average = midtermNum * 0.375 + quizNum * 0.125
-  // Yuvarlanmış ortalama (gösterim için)
+  // Yuvarlanmış ortalama (sadece gösterim için)
   const roundedAverage = Math.ceil(average)
 
   // Final girildiyse toplam not hesaplama (final !== undefined kontrolü ile 0 değerini de kabul eder)
-  // Yuvarlanmış ortalama kullanılmalı (gösterimle tutarlılık için)
+  // Tam ortalama kullanılmalı (yuvarlama sadece gösterim için yapılır, hesaplamalar için değil)
   const hasFinal = final !== "" && !isNaN(finalNum)
   const totalScore = hasFinal 
-    ? roundedAverage + finalNum * 0.5 
+    ? average + finalNum * 0.5 
     : null
 
   // Harf notu hesaplama - yuvarlanmış değer üzerinden yapılır
