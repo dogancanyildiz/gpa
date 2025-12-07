@@ -58,16 +58,46 @@ function calculateFinalNeeded(
   // Ortalama = (vize * 0.375) + (kısa sınav * 0.125)
   const average = midterm * 0.375 + quiz * 0.125
   
-  // Hedef not = ortalama + (final * 0.50)
-  // targetGrade.min = average + (final * 0.50)
-  // final = (targetGrade.min - average) / 0.50
-  // Tam ortalama kullanılmalı (yuvarlama sadece gösterim için yapılır, hesaplamalar için değil)
-  const finalNeeded = (targetGrade.min - average) / 0.5
+  // Yuvarlanmış toplam not = Math.ceil(average + final * 0.5) >= targetGrade.min olmalı
+  // En küçük final için: Math.ceil(average + final * 0.5) = targetGrade.min
+  // Math.ceil(x) = n ise, x > n-1 ve x <= n
+  // Yani: average + final * 0.5 > targetGrade.min - 1
+  // final > (targetGrade.min - 1 - average) / 0.5
+  // En küçük final için: final = ceil((targetGrade.min - 1 - average) / 0.5) + epsilon
+  // Ama daha doğru: Math.ceil(average + final * 0.5) = targetGrade.min olacak şekilde final bul
   
-  if (finalNeeded < 0) return 0
-  if (finalNeeded > 100) return null
+  // Binary search veya doğrudan test ile en küçük final değerini bul
+  // Math.ceil(average + final * 0.5) >= targetGrade.min olacak en küçük final
+  // average + final * 0.5 > targetGrade.min - 1
+  // final > (targetGrade.min - 1 - average) / 0.5
   
-  return Math.ceil(finalNeeded)
+  const minFinalRaw = (targetGrade.min - 1 - average) / 0.5
+  
+  // Eğer minFinalRaw negatifse, final 0 yeterli olabilir
+  if (minFinalRaw < 0) {
+    // Final 0 ile test et
+    const totalWithZero = average + 0 * 0.5
+    const roundedWithZero = Math.ceil(totalWithZero)
+    if (roundedWithZero >= targetGrade.min && roundedWithZero <= targetGrade.max) {
+      return 0
+    }
+  }
+  
+  // En küçük final değerini bulmak için test et
+  // Math.ceil(average + final * 0.5) = targetGrade.min olacak en küçük final
+  for (let final = Math.max(0, Math.ceil(minFinalRaw)); final <= 100; final++) {
+    const totalScore = average + final * 0.5
+    const roundedScore = Math.ceil(totalScore)
+    if (roundedScore >= targetGrade.min && roundedScore <= targetGrade.max) {
+      return final
+    }
+    // Eğer yuvarlanmış not hedef notun üzerindeyse, daha küçük final bulunamaz
+    if (roundedScore > targetGrade.max) {
+      break
+    }
+  }
+  
+  return null
 }
 
 export function GradeCalculator() {
