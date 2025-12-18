@@ -22,11 +22,22 @@ export async function createClient() {
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(cookiesToSet: Array<{ name: string; value: string; options?: CookieOptions }>) {
+        setAll(cookiesToSet: Array<{ name: string; value: string; options?: Partial<CookieOptions> }>) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
+            cookiesToSet.forEach(({ name, value, options }) => {
+              if (options) {
+                // Convert sameSite from boolean to string if needed
+                const cookieOptions: CookieOptions = {
+                  ...options,
+                  sameSite: typeof options.sameSite === 'boolean' 
+                    ? (options.sameSite ? 'strict' : 'lax')
+                    : options.sameSite,
+                }
+                cookieStore.set(name, value, cookieOptions)
+              } else {
+                cookieStore.set(name, value)
+              }
+            })
           } catch {
             // The `setAll` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
